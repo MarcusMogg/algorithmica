@@ -3,18 +3,20 @@
    
     - [1.1. 现代硬件](001-complexity/hardware.md)
     - [1.2. 编程语言](001-complexity/languages.md)
-    - 1.3. Models of Computation
-    - 1.4. When to Optimize
+    - [1.3. 计算模型](001-complexity/lmodels.md)
+    - [1.4. 何时优化](001-complexity/levels.md)
 
-2. Computer Architecture
- 1.1. Instruction Set Architectures
- 1.2. Assembly Language
- 1.3. Loops and Conditionals
- 1.4. Functions and Recursion
- 1.5. Indirect Branching
- 1.6. Machine Code Layout
- 1.7. System Calls
- 1.8. Virtualization
+- [2.计算机体系结构](002-architecture/)
+
+    - [2.1. Instruction Set Architectures]()
+    - [2.2. Assembly Language]()
+    - [2.3. Loops and Conditionals]()
+    - [2.4. Functions and Recursion]()
+    - [2.5. Indirect Branching]()
+    - [2.6. Machine Code Layout]()
+    - [2.7. System Calls]()
+    - [2.8. Virtualization]()
+
 3. Instruction-Level Parallelism
  3.1. Pipeline Hazards
  3.2. The Cost of Branching

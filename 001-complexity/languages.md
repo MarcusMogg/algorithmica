@@ -118,12 +118,11 @@ public class Matmul {
 
 Java是一种 编译的，但不是native语言。程序首先编译为字节码，然后由虚拟机（JVM）解释。为了实现更高的性能，经常执行的代码部分（如最 里面的循环）在运行时编译到机器代码中，然后在几乎没有额外开销的情况下执行。此技术称为实时编译（jit）。
 
-JIT compilation is not a feature of the language itself, but of its implementation. There is also a JIT-compiled version of Python called [PyPy](https://www.pypy.org/), which needs about 12 seconds to execute the code above without any changes to it.
+JIT 不是语言本身的特性，而是其实现的。Python也有JIT编译的版本，例如[PyPy](https://www.pypy.org/)，它只需要执行12s，
 
+## 编译型语言
 
-### Compiled Languages
-
-Now it's turn for C:
+ C:
 
 ```cpp
 #include <stdlib.h>
@@ -155,17 +154,18 @@ int main() {
 }
 ```
 
-It takes 9 seconds when you compile it with `gcc -O3`.
+使用 `gcc -O3` 编译，只需要执行9s.
 
-It doesn't seem like a huge improvement — the 1-3 second advantage over Java and PyPy can be attributed to the additional time of JIT-compilation — but we haven't yet taken advantage of a far better C compiler ecosystem. If we add `-march=native` and `-ffast-math` flags, time suddenly goes down to 0.6 seconds!
+这似乎不是一个巨大的进步——相对于Java和PyPy的1-3秒优势可以归因于JIT编译的额外时间——但我们还没有更好的利用C编译器生态。如果我们添加 `-march=native` 和 `-ffast-math` ，时间会突然下降到 0.6 秒！
 
-What happened here is we [communicated to the compiler](/hpc/compilation/flags/) the exact model of the CPU we are running (`-march=native`) and gave it the freedom to rearrange [floating-point computations](/hpc/arithmetic/float) (`-ffast-math`), and so it took advantage of it and used [vectorization](/hpc/simd) to achieve this speedup.
+我们向编译器传达了我们正在运行的CPU的确切型号（ `-march=native` ），并赋予它重新排列浮点计算的自由（ `-ffast-math` ），因此它可以使用矢量化来实现这种加速。
 
-It's not like it is impossible to tune the JIT-compilers of PyPy and Java to achieve the same performance without significant changes to the source code, but it is certainly easier for languages that compile directly to native code.
 
-### BLAS
+这并不是说，在不对源代码进行重大更改的情况下调整 PyPy 和 Java 的 JIT 编译器以实现相同的性能是不可能的，但对于直接编译为native代码的语言来说，这肯定更容易。
 
-Finally, let's take a look at what an expert-optimized implementation is capable of. We will test a widely-used optimized linear algebra library called [OpenBLAS](https://www.openblas.net/). The easiest way to use it is to go back to Python and just call it from `numpy`:
+## BLAS
+
+最后，让我们看一下专家级优化的实现能够做什么。我们将测试一个名为OpenBLAS的广泛使用的优化线性代数库。使用它的最简单方法是返回到 Python， 并从 `numpy`中调用
 
 ```python
 import time
@@ -184,12 +184,14 @@ duration = time.time() - start
 print(duration)
 ```
 
-Now it takes ~0.12 seconds: a ~5x speedup over the auto-vectorized C version and ~5250x speedup over our initial Python implementation!
+现在需要 0.12 秒：比自动矢量化的 C 版本加速 5 倍，比我们最初的 Python 实现加速 5250 倍！
 
 You don't typically see such dramatic improvements. For now, we are not ready to tell you exactly how this is achieved. Implementations of dense matrix multiplication in OpenBLAS are typically [5000 lines of handwritten assembly](https://github.com/xianyi/OpenBLAS/blob/develop/kernel/x86_64/dgemm_kernel_16x2_haswell.S) tailored separately for *each* architecture. In later chapters, we will explain all the relevant techniques one by one, and then [return](/hpc/algorithms/matmul) to this example and develop our own BLAS-level implementation using just under 40 lines of C.
 
-### Takeaway
+## 总结
 
-The key lesson here is that using a native, low-level language doesn't necessarily give you performance; but it does give you *control* over performance.
 
-Complementary to the "N operations per second" simplification, many programmers also have a misconception that using different programming languages has some sort of multiplier on that number. Thinking this way and [comparing languages](https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html) in terms of performance doesn't make much sense: programming languages are fundamentally just tools that take away *some* control over performance in exchange for convenient abstractions.  Regardless of the execution environment, it is still largely a programmer's job to use the opportunities that the hardware provides.
+这里的关键在于：使用 native ，低级别的语言并不一定会给你带来性能提升，但是可以让你控制性能
+
+除了“每秒N次操作”的简化之外，许多程序员也有一个误解，认为使用不同的编程语言对该数字有某种乘数。以这种方式思考并从性能方面比较语言没有多大意义：编程语言从根本上说只是一些工具，它剥夺了对性能的一些控制，以换取方便的抽象。无论执行环境如何，利用硬件提供的机会在很大程度上仍然是程序员的工作。
+

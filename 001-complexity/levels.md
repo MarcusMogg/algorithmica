@@ -1,8 +1,3 @@
----
-title: When to Optimize
-weight: 4
-draft: true
----
 
 Why do companies like Google ask to whiteboard-solve algorithm problems in their interviews?
 

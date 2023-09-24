@@ -13,26 +13,13 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_sidebar.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "80c4a810bd3c849a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "001-complexity/languages.md",
+                "file": "002-architecture/README.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -98,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "001-complexity/languages.md",
+                "file": "002-architecture/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "001-complexity/languages.md",
+                "file": "002-architecture/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "001-complexity/languages.md"
+                "file": "002-architecture/README.md"
               }
             }
           }
@@ -159,16 +146,32 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "80c4a810bd3c849a",
+  "active": "1a44722d7966affd",
   "lastOpenFiles": [
-    "001-complexity/hardware.md",
+    "_sidebar.md",
+    "002-architecture/img/pdf.png",
+    "002-architecture/img/clt.png",
+    "002-architecture/img/monte-carlo.gif",
+    "002-architecture/img/birthday.png",
+    "002-architecture/README.md",
+    "002-architecture/layout.md",
+    "002-architecture/loops.md",
+    "002-architecture/isa.md",
+    "002-architecture/interaction.md",
+    "002-architecture/indirect.md",
+    "002-architecture/functions.md",
+    "002-architecture/assembly.md",
+    "002-architecture/img",
+    "002-architecture",
     "001-complexity/levels.md",
     "001-complexity/models.md",
     "001-complexity/languages.md",
-    "_sidebar.md",
+    "001-complexity/hardware.md",
+    "hpc/arithmetic/float.md",
+    "hpc/arithmetic",
+    "hpc",
     "hpc/cpu-cache/latency.md",
     "hpc/cpu-cache",
-    "hpc",
     "001-complexity/img/dennard.png",
     "001-complexity/README.md",
     "001-complexity.md",
