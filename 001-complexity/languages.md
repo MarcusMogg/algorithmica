@@ -12,26 +12,26 @@
 ## 语言类型
 
 
-On the lowest level, computers execute *machine code* consisting of binary-encoded *instructions* which are used to control the CPU. They are specific, quirky, and require a great deal of intellectual effort to work with, so one of the first things people did after creating computers was create *programming languages*, which abstract away some details of how computers operate to simplify the process of programming.
+在最低级别，计算机执行二进制编码指令的*机器码*，用于控制 CPU。它们非常难以使用，所以人们创造了计算机之后的第一件是就是创造 *编程语言*。它抽象出计算机操作的一些细节，以简化编程过程。
 
-在最低级别，计算机执行二进制编码指令的*机器码*，用于控制 CPU。
+编程语言本质上只是一个接口，编写的任何程序总要在某个时候转换为 CPU执行的机器码，有多种不同的方式来做到这一点：
 
-A programming language is fundamentally just an interface. Any program written in it is just a nicer higher-level representation which still at some point needs to be transformed into the machine code to be executed on the CPU — and there are several different means of doing that:
 
-- From a programmer's perspective, there are two types of languages: *compiled*, which pre-process before executing, and *interpreted*, which are executed during runtime using a separate program called *an interpreter*.
-- From a computer's perspective, there are also two types of languages: *native*, which directly execute machine code, and *managed*, which rely on some sort of *runtime* to do it.
+- 从程序员视角，有两种类型的语言：编译型，在执行之前预处理； 解释型，运行时转换
+- 从计算机视角，也有两种类型：native, 直接执行机器码；托管，依赖于某种运行时来执行
 
-Since running machine code in an interpreter doesn't make sense, this makes a total of three types of languages:
 
-- Interpreted languages, such as Python, JavaScript, or Ruby.
-- Compiled languages with a runtime, such as Java, C#, or Erlang (and languages that work on their VMs, such as Scala, F#, or Elixir).
-- Compiled native languages, such as C, Go, or Rust.
+由于在解释器中运行机器代码没有意义，因此总共有三种类型的语言：:
 
-There is no "right" way of executing computer programs: each approach has its own gains and drawbacks. Interpreters and virtual machines provide flexibility and enable some nice high-level programming features such as dynamic typing, run time code alteration, and automatic memory management, but these come with some unavoidable performance trade-offs, which we will now talk about.
+- 解释型语言 Python, JavaScript, or Ruby.
+- 带运行时的编译型语言,  Java, C#
+- 编译为native的语言 C, C++， Rust.
 
-### Interpreted languages
+执行计算机程序没有“正确”的方法：每种方法都有自己的优点和缺点。解释器和虚拟机提供了灵活性，并支持一些不错的高级编程功能，例如动态类型、运行时代码更改和自动内存管理，但这些都带来了一些不可避免的性能权衡，我们现在将讨论这些功能。
 
-Here is an example of a by-definition $1024 \times 1024$ matrix multiplication in pure Python:
+## 解释型语言
+
+一个用python写的 $1024 \times 1024$ 矩阵乘法:
 
 ```python
 import time
@@ -62,23 +62,23 @@ duration = time.time() - start
 print(duration)
 ```
 
-This code runs in 630 seconds. That's more than 10 minutes!
+这份代码需要运行 630 s.  超过10min了！
 
-Let's try to put this number in perspective. The CPU that ran it has a clock frequency of 1.4GHz, meaning that it does $1.4 \cdot 10^9$ cycles per second, totaling to almost $10^{15}$ for the entire computation, and about 880 cycles per multiplication in the innermost loop.
+让我们试着正确看待这个数字。运行它的CPU的时钟频率为1.4GHz，这意味着它每秒执行 $1.4 \cdot 10^9$  周期， 整个计算大概 $10^{15}$ 次操作，也就是说最里面的循环中每次乘法大约880个周期。
 
-This is not surprising if you consider the things that Python needs to do to figure out what the programmer meant:
+如果你知道 Python做了哪些事来理解程序员的意图，你就不会奇怪：
+- 解析表达式 `c[i][j] += a[i][k] * b[k][j]`;
+- 尝试找出 `a`, `b`, and `c` ，并在带有类型信息的特殊哈希表中查找它们的名称;
+- 理解`a` 是一个数组, 获取 `[]` 运算符, 检索`a[i]`, 理解他也是一个数组,再次获取 `[]` 运算符, 获取 `a[i][k]`的指针, 然后再获取你本身
+- 查找其类型 `float`, 然后获取 `*` 运算符;
+- 在 `b`  `c` 上执行相同操作，最后把结果写到 `c[i][j]`.
 
-- it parses the expression `c[i][j] += a[i][k] * b[k][j]`;
-- tries to figure out what `a`, `b`, and `c` are and looks up their names in a special hash table with type information;
-- understands that `a` is a list, fetches its `[]` operator, retrieves the pointer for `a[i]`, figures out it's also a list, fetches its `[]` operator again, gets the pointer for `a[i][k]`, and then the element itself;
-- looks up its type, figures out that it's a `float`, and fetches the method implementing `*` operator;
-- does the same things for `b` and `c` and finally add-assigns the result to `c[i][j]`.
+当然，广泛使用的语言（如Python）的解释器得到了很好的优化，他们可以在重复执行相同的代码时跳过其中一些步骤。但是，由于语言设计，一些相当大的开销仍然是不可避免的。如果我们摆脱所有这些类型的检查和pointer chasing，也许我们可以得到接近 1 的乘法比率的周期数，或者本机乘法的“成本”
 
-Granted, the interpreters of widely used languages such as Python are well-optimized, and they can skip through some of these steps on repeated execution of the same code. But still, some quite significant overhead is unavoidable due to the language design. If we get rid of all this type checking and pointer chasing, perhaps we can get cycles per multiplication ratio closer to 1, or whatever the "cost" of native multiplication is?
+## 托管语言
 
-### Managed Languages
 
-The same matrix multiplication procedure, but implemented in Java:
+相同的矩阵乘法过程，但是使用java
 
 ```java
 import java.util.Random;
@@ -113,11 +113,13 @@ public class Matmul {
 }
 ```
 
-It now runs in 10 seconds, which amounts to roughly 13 CPU cycles per multiplication — 63 times faster than Python. Considering that we need to read elements of `b` non-sequentially from the memory, the running time is roughly what it is supposed to be.
 
-Java is a *compiled*, but not *native* language. The program first compiles to *bytecode*, which is then interpreted by a virtual machine (JVM). To achieve higher performance, frequently executed parts of the code, such as the innermost `for` loop, are compiled into the machine code during runtime and then executed with almost no overhead. This technique is called *just-in-time compilation*.
+现在只需要执行10s，每个乘法大概只需要13个CPU 周期，比Python快63倍。
+
+Java是一种 编译的，但不是native语言。程序首先编译为字节码，然后由虚拟机（JVM）解释。为了实现更高的性能，经常执行的代码部分（如最 里面的循环）在运行时编译到机器代码中，然后在几乎没有额外开销的情况下执行。此技术称为实时编译（jit）。
 
 JIT compilation is not a feature of the language itself, but of its implementation. There is also a JIT-compiled version of Python called [PyPy](https://www.pypy.org/), which needs about 12 seconds to execute the code above without any changes to it.
+
 
 ### Compiled Languages
 
