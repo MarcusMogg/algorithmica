@@ -1,37 +1,35 @@
 
 1960年代超级计算机的主要劣势不是慢，而是体积大、使用复杂，而且价格昂贵，只有超级大国可以负担的起。尺寸是它们如此昂贵的原因：需要大量定制组件，这些组件必须由拥有电气工程高级学位的人员非常仔细地组装，这个过程无法扩大规模以进行大规模生产。
 
-The turning point was the development of *microchips* — single, tiny, complete circuits — which revolutionized the industry and turned out to be probably the most important invention of the 20th century. What was a multimillion-dollar cupboard of computing machinery in 1965 could in 1975 fit on a [4mm × 4mm slice of silicon](https://en.wikipedia.org/wiki/MOS_Technology_6502)[^size] that you can buy for $25. This dramatic improvement in affordability started the home computer revolution during the following decade, with computers like Apple II, Atari 2600, Commodore 64, and IBM PC becoming available to the masses.
+转折点是微芯片的发展，独立、微小、完整的电路。它彻底改变了整个行业，可以说是20世纪最伟大的发明。1965年价值百万、橱柜大小的计算机 在1975年可以放在 4nm × 4mm 的硅片上，你只需要花25美元就可以买到。在接下来的10年里，成本的显著减低开启了家用机的革命。
 
-转折点是微芯片的发展，独立、
 
-[^size]: Actual sizes of CPUs are about centimeter-scale because of power management, heat dissipation, and the need to plug it into the motherboard without excessive swearing.
+## 微芯片是如何制作的
 
-### How Microchips are Made
+微芯片使用被称为 [光刻](https://en.wikipedia.org/wiki/Photolithography)的工艺打印在硅晶体上, 该过程涉及：
 
-Microchips are "printed" on a slice of crystalline silicon using a process called [photolithography](https://en.wikipedia.org/wiki/Photolithography), which involves
+1. 生产和切割 [非常纯粹的硅晶体](https://en.wikipedia.org/wiki/Wafer_(electronics)),
+2. 用一层 [光子撞击时溶解的物质](https://en.wikipedia.org/wiki/Photoresist)覆盖
+3. 使用光子按照指定方式撞击,
+4. 对暴露的部分进行 [蚀刻](https://en.wikipedia.org/wiki/Etching_(microfabrication)) ,
+5. 去除剩余的光刻胶
 
-1. growing and slicing a [very pure silicon crystal](https://en.wikipedia.org/wiki/Wafer_(electronics)),
-2. covering it with a layer of [a substance that dissolves when photons hit it](https://en.wikipedia.org/wiki/Photoresist),
-3. hitting it with photons in a set pattern,
-4. chemically [etching](https://en.wikipedia.org/wiki/Etching_(microfabrication)) the now-exposed parts,
-5. removing the remaining photoresist,
-
-…and then performing another 40-50 steps over several months to complete the rest of the CPU.
 
 ![](../img/lithography.png)
 
-Consider now the "hit it with photons" part. For that, we can use a system of lenses that projects a pattern onto a much smaller area, effectively making a tiny circuit with all the desired properties. This way, the optics of the 1970s were able to fit a few thousand transistors on the size of a fingernail, which gives microchips several key advantages that macro-world computers didn't have:
+考虑光子撞击部分。为此，我们可以使用一个透镜系统，将图案投射到更小的区域上，有效地制作出具有所需属性的微小电路。通过这种方式，1970 年代的光学器件能够在指甲盖大小上安装数千个晶体管，这为微芯片提供了宏计算机所不具备的几个关键优势：
 
-- higher clock rates (that were previously limited by the speed of light);
-- the ability to scale the production;
-- much lower material and power usage, translating to much lower cost per unit.
+- 更高的时钟速率（受光速限制）
+- 扩大生产规模;
+-  材料和电力使用量大大降低，单位成本大大降低
 
-Apart from these immediate benefits, photolithography enabled a clear path to improve performance further: you can just make lenses stronger, which in turn would create smaller, but functionally identical devices with relatively little effort.
+除了这些直接的好处之外，光刻技术还为进一步提高性能提供了一条清晰的途径：你可以使镜头更强大，这反过来又会以相对较少的努力创造出更小但功能相同的设备。
 
-### Dennard Scaling
+## Dennard Scaling
 
 Consider what happens when we scale a microchip down. A smaller circuit requires proportionally fewer materials, and smaller transistors take less time to switch (along with all other physical processes in the chip), allowing reducing the voltage and increasing the clock rate.
+
+想一想当我们缩小微芯片大小时会发生什么。
 
 A more detailed observation, known as the *Dennard scaling*, states that reducing transistor dimensions by 30%
 
@@ -49,7 +47,7 @@ Due to the trade-offs between energy and performance you can make during the des
 
 Throughout most of the computing history, optical shrinking was the main driving force behind performance improvements. Gordon Moore, the former CEO of Intel, predicted in 1975 that the transistor count in microprocessors will double every two years. His prediction held to this day and became known as *Moore's law*.
 
-![](../img/dennard.ppm)
+![](../img/dennard.png)
 
 Both Dennard scaling and Moore's law are not actual laws of physics, but just observations made by savvy engineers. They are both destined to stop at some point due to fundamental physical limitations, the ultimate one being the size of silicon atoms. In fact, Dennard scaling already did — due to power issues.
 
