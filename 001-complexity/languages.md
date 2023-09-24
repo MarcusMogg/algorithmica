@@ -1,33 +1,20 @@
 
 如果你正在阅读本书，那么在你的计算机科学之旅中，存在某个时刻，你第一次开始关心代码的效率。
 
-Mine was in high school, when I realized that making websites and doing *useful* programming won't get you into a university, and entered the exciting world of algorithmic programming olympiads. I was an okay programmer, especially for a highschooler, but I had never really wondered how much time it took for my code to execute before. But suddenly it started to matter: each problem now has a strict time limit. I started counting my operations. How many can you do in one second?
+我是在高中时，意识到制作网站和做有用的编程不会让你进入大学，并进入了令人兴奋的算法竞赛世界。我是一个不错的程序员，特别是对于一个高中生来说，但我从来没有真正想知道我的代码需要多少时间才能执行。但突然之间，它开始变得重要：现在每个问题都有严格的时间限制。我开始计算我的操作。一秒钟能做多少？
 
-I didn't know much about computer architecture to answer this question. But I also didn't need the right answer — I needed a rule of thumb. My thought process was: "2-3GHz means 2 to 3 billion instructions executed every second, and in a simple loop that does something with array elements, I also need to increment loop counter, check end-of-loop condition, do array indexing and stuff like that, so let's add room for 3-5 more instructions for every useful one" and ended up with using $5 \cdot 10^8$ as an estimate. None of these statements are true, but counting how many operations my algorithm needed and dividing it by this number was a good rule of thumb for my use case.
+我对计算机体系结构了解不多，无法回答这个问题。但我也不需要一个正确的答案——只需要一个经验法则。我的想法是：“2-3GHz 意味着每秒执行 2-30 亿条指令，在对数组元素执行某些操作的简单循环中，我还需要增加循环计数器，检查循环结束条件，做数组索引之类的东西，所以让我们为每个有用的指令增加 3-5 条指令的空间”，最后使用 $5 \cdot 10^8$ 作为估计。这些陈述都不是真的，但是计算我的算法需要多少操作并将其除以这个数字对于我的用例来说是一个很好的经验法则。
 
-The real answer, of course, is much more complicated and highly dependent on what kind of "operation" you have in mind. It can be as low as $10^7$ for things like [pointer chasing](/hpc/cpu-cache/latency) and as high as $10^{11}$ for [SIMD-accelerated](/hpc/simd) linear algebra. To demonstrate these striking differences, we will use the case study of matrix multiplication implemented in different languages — and dig deeper into how computers execute them.
 
-<!--
 
-Because of this logic, and also because of the [computation model](../) postulated in CS 101, many programmers have a misconception that computers can execute a certain number of "operations" per second, and that using different programming languages has some sort of [multiplier effect](https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html) on that number:
+当然，真实的答案要复杂的多，并且高度取决于你想要什么操作。像  *pointer chasing* 可以慢到 s $10^7$  ，而 SIMD 加速过的线性代数可以快到   $10^{11}$ 。为了证明这些显着的差异，我们将使用以不同语言实现的矩阵乘法的案例研究，并更深入地研究计算机如何执行它们。
 
-- "you can execute about $5 \cdot 10^8$ operations per second on this machine,"
-- "C is 2 times faster than Java,"
-- "Python is 100x slower than C++."
+## 语言类型
 
--->
-
-## Types of Languages
-
-<!--
-
-Processors can be thought of as *state machines*. They keep their *state* in several fixed-length *registers*, one of which, the instruction pointer, indicates a memory location of the next instruction to be read and executed. This instruction somehow modifies the registers and moves the instruction pointer to the next instruction to be executed, and so on.
-
-These instructions — called *machine code* — are binary encoded, quirky and very difficult to work with, so no sane person writes them directly nowadays. Instead, we use higher-level programming languages and employ alternative means to feed instructions to the processor.
-
--->
 
 On the lowest level, computers execute *machine code* consisting of binary-encoded *instructions* which are used to control the CPU. They are specific, quirky, and require a great deal of intellectual effort to work with, so one of the first things people did after creating computers was create *programming languages*, which abstract away some details of how computers operate to simplify the process of programming.
+
+在最低级别，计算机执行二进制编码指令的*机器码*，用于控制 CPU。
 
 A programming language is fundamentally just an interface. Any program written in it is just a nicer higher-level representation which still at some point needs to be transformed into the machine code to be executed on the CPU — and there are several different means of doing that:
 

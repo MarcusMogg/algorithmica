@@ -8,18 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "3e87334088924d82",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "001-complexity/languages.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "f14312167425e2e5",
             "type": "leaf",
             "state": {
@@ -30,8 +18,21 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "80c4a810bd3c849a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "001-complexity/languages.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -158,15 +159,18 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "3e87334088924d82",
+  "active": "80c4a810bd3c849a",
   "lastOpenFiles": [
     "001-complexity/hardware.md",
-    "_sidebar.md",
-    "001-complexity/img/dennard.png",
-    "001-complexity/README.md",
-    "001-complexity/languages.md",
     "001-complexity/levels.md",
     "001-complexity/models.md",
+    "001-complexity/languages.md",
+    "_sidebar.md",
+    "hpc/cpu-cache/latency.md",
+    "hpc/cpu-cache",
+    "hpc",
+    "001-complexity/img/dennard.png",
+    "001-complexity/README.md",
     "001-complexity.md",
     "README.md"
   ]
