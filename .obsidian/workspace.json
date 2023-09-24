@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "001-complexity/hardware.md",
+                "file": "001-complexity/languages.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "001-complexity/hardware.md",
+                "file": "001-complexity/languages.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "001-complexity/hardware.md",
+                "file": "001-complexity/languages.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "001-complexity/hardware.md"
+                "file": "001-complexity/languages.md"
               }
             }
           }
@@ -158,11 +158,11 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "1a44722d7966affd",
+  "active": "3e87334088924d82",
   "lastOpenFiles": [
-    "001-complexity/img/dennard.png",
-    "_sidebar.md",
     "001-complexity/hardware.md",
+    "_sidebar.md",
+    "001-complexity/img/dennard.png",
     "001-complexity/README.md",
     "001-complexity/languages.md",
     "001-complexity/levels.md",

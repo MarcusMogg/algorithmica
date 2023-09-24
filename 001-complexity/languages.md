@@ -1,10 +1,3 @@
----
-title: Programming Languages
-aliases:
-  - /hpc/analyzing-performance
-weight: 2
-published: true
----
 
 If you are reading this book, then somewhere on your computer science journey you had a moment when you first started to care about the efficiency of your code.
 

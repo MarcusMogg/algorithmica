@@ -2,7 +2,7 @@
 - [1. 复杂度模型](001-complexity/)
    
     - [1.1. 现代硬件](001-complexity/hardware.md)
-    - 1.2. Programming Languages
+    - [1.2. 编程语言](001-complexity/languages.md)
     - 1.3. Models of Computation
     - 1.4. When to Optimize
 
