@@ -1,12 +1,9 @@
----
-title: Modern Hardware
-weight: 1
-ignoreIndexing: true
----
 
-The main disadvantage of the supercomputers of the 1960s wasn't that they were slow — relatively speaking, they weren't — but that they were giant, complex to use, and so expensive that only the governments of the world superpowers could afford them. Their size was the reason they were so expensive: they required a lot of custom components that had to be very carefully assembled in the macro-world, by people holding advanced degrees in electrical engineering, in a process that couldn't be scaled up for mass production.
+1960年代超级计算机的主要劣势不是慢，而是体积大、使用复杂，而且价格昂贵，只有超级大国可以负担的起。尺寸是它们如此昂贵的原因：需要大量定制组件，这些组件必须由拥有电气工程高级学位的人员非常仔细地组装，这个过程无法扩大规模以进行大规模生产。
 
 The turning point was the development of *microchips* — single, tiny, complete circuits — which revolutionized the industry and turned out to be probably the most important invention of the 20th century. What was a multimillion-dollar cupboard of computing machinery in 1965 could in 1975 fit on a [4mm × 4mm slice of silicon](https://en.wikipedia.org/wiki/MOS_Technology_6502)[^size] that you can buy for $25. This dramatic improvement in affordability started the home computer revolution during the following decade, with computers like Apple II, Atari 2600, Commodore 64, and IBM PC becoming available to the masses.
+
+转折点是微芯片的发展，独立、
 
 [^size]: Actual sizes of CPUs are about centimeter-scale because of power management, heat dissipation, and the need to plug it into the motherboard without excessive swearing.
 

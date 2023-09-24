@@ -2,7 +2,7 @@
 许多计算机科学的书籍都会在一开始引入**算法复杂度** 的概念，简单来说，就是计算过程中所有基本操作（加、减、乘、除……）的总和，有的时候也会按操作的成本进行加权。
 
 算法复杂度是一个古老的概念，在1960年代早期系统制定，在那之后广泛应用于算法设计的代价函数。这个模型被广泛采用的原因是它很好的近似了当时计算机的工作方式。
-# 经典复杂度理论
+## 经典复杂度理论
 
 CPU的基本操作被称为**指令（instructions）**，它们的成本被称为**延迟（latencies）**。 指令被存储在内存中，并被处理器一条一条的处理，处理器有一系列**寄存器（register）** 存储内部状态。其中一个存储器被称为指令指针（instruction pointer，IP），用于指示下一条需要读取和执行的指令。每条指令会改变处理器的状态，可能会修改主存，，并且需要不同的CPU周期来完成，然后才能启动下一条指令。
 
@@ -18,16 +18,14 @@ CPU的基本操作被称为**指令（instructions）**，它们的成本被称�
 
 类似于 将指令延迟的总和用作总执行时间，计算复杂度可用于量化抽象算法的内在时间要求，而无需依赖特定计算机的选择。
 
-# 渐进复杂度
+## 渐进复杂度
 
-The idea to express execution time as a function of input size seems obvious now, but it wasn't so in the 1960s. Back then, [typical computers](https://en.wikipedia.org/wiki/CDC_1604) cost millions of dollars, were so large that they required a separate room, and had clock rates measured in kilohertz. They were used for practical tasks at hand, like predicting the weather, sending rockets into space, or figuring out how far a Soviet nuclear missile can fly from the coast of Cuba — all of which are finite-length problems. Engineers of that era were mainly concerned with how to multiply $3 \times 3$ matrices rather than $n \times n$ ones.
+将执行时间表示为输入大小的函数现在看起来很显然，但在1960年代并非如此。那时候的计算机又大又贵，执行速度还慢。多被用于实际任务，比如预测天气，将火箭送入太空，或者弄清楚苏联核导弹可以从古巴海岸飞多远——所有这些都是有限长度的问题。那个时代的工程师主要关心如何计算 $3 \times 3$ 矩阵而不是 $n \times n$ 矩阵。
 
-将执行时间
-
-What caused the shift was the acquired confidence among computer scientists that computers will continue to become faster — and indeed they have. Over time, people stopped counting execution time, then stopped counting cycles, and then even stopped counting operations exactly, replacing it with an *estimate* that, on sufficiently large inputs, is only off by no more than a constant factor. With *asymptotic complexity*, verbose "$4 \cdot n^3 - n^2$ operations" turns into plain "$\Theta(n^3)$," hiding the initial costs of individual operations in the "Big O," along with all the other intricacies of the hardware.
+导致这种转变的原因是计算机科学家相信 计算机将变得更快——事实上确实如此。随着时间的推移，人们停止计算执行时间，然后停止计算周期，甚至停止完全计数操作，取而代之的是估计值，在足够大的输入上，只差不超过一个常数因子。随着渐近的复杂性，冗长的“ $4 \cdot n^3 - n^2$ 操作”变成了简单的 "$\Theta(n^3)$"，将单个操作的成本以及硬件的所有其他复杂性隐藏在”大O“中 。
 
 ![](img/complexity.jpg)
 
-The reason we use asymptotic complexity is that it provides simplicity while still being just precise enough to yield useful results about relative algorithm performance on large datasets. Under the promise that computers will eventually become fast enough to handle any *sufficiently large* input in a reasonable amount of time, asymptotically faster algorithms will always be faster in real-time too, regardless of the hidden constant.
+我们使用渐近复杂性的原因是：它足够简单，同时仍然足够精确，可以在大型数据集上产生算法性能的有用结果。在计算机最终将变得足够快以在合理的时间内处理任何足够大的输入的承诺下，渐近复杂度更快的算法 真实跑起来也会更快，无论隐藏常数如何。
 
-But this promise turned out to be not true — at least not in terms of clock speeds and instruction latencies — and in this chapter, we will try to explain why and how to deal with it.
+但事实证明，这个承诺是不正确的——至少在时钟速度和指令延迟方面不是这样——在本章中，我们将尝试解释为什么以及如何处理它。
