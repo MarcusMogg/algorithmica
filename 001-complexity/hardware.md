@@ -27,15 +27,13 @@
 
 ## Dennard Scaling
 
-Consider what happens when we scale a microchip down. A smaller circuit requires proportionally fewer materials, and smaller transistors take less time to switch (along with all other physical processes in the chip), allowing reducing the voltage and increasing the clock rate.
+想一想当我们缩小微芯片大小时会发生什么。更小的电路需要更少的物料，更小的晶体管需要更少的时间来切换（以及芯片中的所有其他物理过程），从而可以降低电压并提高时钟速率。
 
-想一想当我们缩小微芯片大小时会发生什么。
+更详细的观察结果,被称为 *Dennard scaling*, 指出 晶体管尺寸每减少 30%
 
-A more detailed observation, known as the *Dennard scaling*, states that reducing transistor dimensions by 30%
-
-- doubles the transistor density ($0.7^2 \approx 0.5$),
-- increases the clock speed by 40% ($\frac{1}{0.7} \approx 1.4$),
-- and leaves the overall *power density* the same.
+- 晶体管密度加倍 ($0.7^2 \approx 0.5$),
+- 时钟速度提高 40% ($\frac{1}{0.7} \approx 1.4$),
+- **功率密度**（每单位体积的功率） 不变
 
 Since the per-unit manufacturing cost is a function of area, and the exploitation cost is mostly the cost of power[^power], each new "generation" should have roughly the same total cost, but 40% higher clock and twice as many transistors, which can be promptly used, for example, to add new instructions or increase the word size — to keep up with the same miniaturization happening in memory microchips.
 
