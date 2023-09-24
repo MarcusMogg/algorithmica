@@ -1,5 +1,5 @@
 
-If you are reading this book, then somewhere on your computer science journey you had a moment when you first started to care about the efficiency of your code.
+如果你正在阅读本书，那么在你的计算机科学之旅中，存在某个时刻，你第一次开始关心代码的效率。
 
 Mine was in high school, when I realized that making websites and doing *useful* programming won't get you into a university, and entered the exciting world of algorithmic programming olympiads. I was an okay programmer, especially for a highschooler, but I had never really wondered how much time it took for my code to execute before. But suddenly it started to matter: each problem now has a strict time limit. I started counting my operations. How many can you do in one second?
 
