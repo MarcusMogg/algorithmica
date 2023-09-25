@@ -1,11 +1,6 @@
----
-title: Assembly Language
-weight: 1
-published: true
----
 
 CPUs are controlled with *machine language*, which is just a stream of binary-encoded instructions that specify
-
+CPU 由机器语言控制。机器语言就是一串二进制编码的
 - the instruction number (called *opcode*),
 - what its *operands* are (if there are any),
 - and where to store the *result* (if one is produced).
