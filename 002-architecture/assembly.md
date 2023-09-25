@@ -78,24 +78,22 @@ SIZE PTR [base + index * scale + displacement]
  `scale` 可以是 2, 4, or 8.
   他执行的操作是计算 `base + index * scale + displacement` 然后接引用
 
-<!-- You can use them in any order: the assembler will figure it out. -->
+使用复杂的寻址通常会比直接解引用指针最多慢一个 时钟周期，但你需要时会比较有用，例如 ，加载一个 struct 数组的第i个元素的某个字段。
 
-Using complex addressing is [at most one cycle slower](/hpc/cpu-cache/pointers) than dereferencing a pointer directly, and it can be useful when you have, for example, an array of structures and want to load a specific field of its $i$-th element.
-
-Addressing operator needs to be prefixed with a size specifier for how many bits of data are needed:
+寻址操作符 需要加一个前缀指示数据需要多少bit
 
 - `BYTE` for 8 bits
 - `WORD` for 16 bits
 - `DWORD` for 32 bits
 - `QWORD` for 64 bits
 
-There is also a more rare `TBYTE` for [80 bits](/hpc/arithmetic/float), and `XMMWORD`, `YMMWORD`, and `ZMMWORD` for [128, 256, and 512 bits](/hpc/simd) respectively. All these types don't have to be written in uppercase, but this is how most compilers emit them.
+也有比较少见的 `TBYTE` for 80 bit,   `XMMWORD`, `YMMWORD`, and `ZMMWORD` for 128, 256,  and 512 bits . 这些类型不必大写，但是通常编译器这样写。
 
-The address computation is often useful by itself: the `lea` ("load effective address") instruction calculates the memory address of the operand and stores it in a register in one cycle, without doing any actual memory operations. While its intended use is for actually computing memory addresses, it is also often used as an arithmetic trick that would otherwise involve 1 multiplication and 2 additions — for example, you can multiply by 3, 5, and 9 with it.
+地址计算本身通常很有用： `lea` （“加载有效地址”）指令计算操作数的内存地址，并在一个周期内将其存储在寄存器中，而无需执行任何实际的内存操作。虽然它的预期用途是实际计算内存地址，但它也经常被用作算术技巧，否则将涉及 1 次乘法和 2 次加法——例如，你可以用它乘以 3、5 和 9。
 
-It also frequently serves as a replacement for `add` because it doesn't need a separate `mov` instruction if you need to move the result somewhere else: `add` only works in the two-register `a += b` mode, while `lea` lets you do `a = b + c` (or even `a = b + c + d` if one of them is a constant).
+它也经常作为 `add` 的替代品 ，因为如果需要将结果移动到其他地方，它不需要单独的 `mov` 指令： `add` 仅在双寄存器 `a += b` 模式下工作，而 `lea` 允许这样做 `a = b + c` （或者 `a = b + c + d` 其中一个是常量）。
 
-### Alternative Syntax
+## 选择语法
 
 There are actually multiple *assemblers* (the programs that produce machine code from assembly) with different assembly languages, but only two x86 syntaxes are widely used now. They are commonly called after the two companies that used them and had a dominant influence on programming during that era:
 
