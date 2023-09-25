@@ -36,28 +36,28 @@ mov DWORD PTR [rdx], eax  ; write contents of eax to wherever rdx points
 请注意，上面两份代码片段不仅是语法不同，两者都是编译器优化后产生的代码，x86使用3条指令但是arm 使用4条。`add eax, [rdi]` 指令是 *融合指令fused instruction* ，一次性执行加载和 加法，这是使用CISC 提供的好处
 
 由于架构之间的差异远不止这个，从这里开始和本书的其余部分，我们将只提供 x86 的示例，这可能是我们大多数读者会优化的内容，尽管许多引入的概念将与架构无关。
-### 指令和寄存器
+## 指令和寄存器
 
 
 处于历史原因，汇编语言中的指令助记符非常简洁。当时人们习惯于手写汇编并反复编写同一组通用指令时，少输入一个字符就远离精神错乱一步。
 
-For example, `mov` is for "store/load a word," `inc` is for "increment by 1," `mul` is for "multiply," and `idiv` is for "integer division." You can look up the description of an instruction by its name in [one of x86 references](https://www.felixcloutier.com/x86/), but most instructions do what you'd think they do.
+例如，`mov` 用于加载/存储字，`inc`是加一，`mul` 是 乘法，`idiv` 是整数除法。你可以在[x86 手册](https://www.felixcloutier.com/x86/)中用名字查找一个指令的说明，但它们大部分执行的操作就和你想的一样
 
-Most instructions write their result into the first operand, which can also be involved in the computation like in the `add eax, [rdi]` example we saw before. Operands can be either registers, constant values, or memory locations.
+大部分指令将结果写回到第一个操作数，就像我们上面的例子`add eax, [rdi]`一样，他也可以参与运算。操作数可以是 寄存器、常数或者内存地址
 
-**Registers** are named `rax`, `rbx`, `rcx`, `rdx`, `rdi`, `rsi`, `rbp`, `rsp`, and `r8`-`r15` for a total of 16 of them. The "letter" ones are named like that for historical reasons: `rax` is "accumulator," `rcx` is "counter," `rdx` is "data" and so on — but, of course, they don't have to be used only for that.
+寄存器 命名为 `rax`, `rbx`, `rcx`, `rdx`, `rdi`, `rsi`, `rbp`, `rsp`,  `r8`-`r15`   16个。字母命名是出于历史原因：  `rax` 累加器 ，`rcx` 是计数器，“ `rdx` 是数据 等等 。 但是，当然，没有限制只能这样用。
 
-There are also 32-, 16-bit and 8-bit registers that have similar names (`rax` → `eax` → `ax` → `al`). They are not fully separate but *aliased*: the lowest 32 bits of `rax` are `eax`, the lowest 16 bits of `eax` are `ax`, and so on. This is made to save die space while maintaining compatibility, and it is also the reason why basic type casts in compiled programming languages are usually free. 
+有 32bit、16bit、8bit的寄存器，其名字类似 (`rax` → `eax` → `ax` → `al`)，它们不是完全独立的而是相互重叠的：例如 `rax` 的低16位是 `eax`，`eax` 的低8位是 `ax`，依次类推。这样做是为了节省芯片空间，同时保证兼容性。这也是为什么在编译型语言中，基本类型转换是免费的。
 
-These are just the *general-purpose* registers that you can, with [some exceptions](../functions), use however you like in most instructions. There is also a separate set of registers for [floating-point arithmetic](/hpc/arithmetic/float), a bunch of very wide registers used in [vector extensions](/hpc/simd), and a few special ones that are needed for [control flow](../loops), but we'll get there in time.
+这只是通用寄存器，除了一些例外，你可以随意使用大部分寄存器。也有一些独立的寄存器用于浮点计算，一些用于向量拓展的宽寄存器，一些特殊的寄存器用于控制流。我们到时候会介绍它们。
 
-**Constants** are just integer or floating-point values: `42`, `0x2a`, `3.14`, `6.02e23`. They are more commonly called *immediate values* because they are embedded right into the machine code. Because it may considerably increase the complexity of the instruction encoding, some instructions don't support immediate values or allow just a fixed subset of them. In some cases, you have to load a constant value into a register and then use it instead of an immediate value.
+常量只能是 整数或 浮点数 `42`, `0x2a`, `3.14`, `6.02e23`。它们通常被叫作立即数（*immediate values*），因为它们被直接编码到机器码中。由于它可能会大大增加指令编码的复杂度，一些指令 不支持立即数，或者只能有限使用子集。某些场景下，你必须先把常量加载到寄存器中。
 
-Apart from numeric values, there are also string constants such as `hello` or `world\n` with their own little subset of operations, but that is a somewhat obscure corner of the assembly language that we are not going to explore here.
-
-### Moving Data
+## Moving Data
 
 Some instructions may have the same mnemonic, but have different operand types, in which case they are considered distinct instructions as they may perform slightly different operations and take different times to execute. The `mov` instruction is a vivid example of that, as it comes in around 20 different forms, all related to moving data: either between the memory and registers or just between two registers. Despite the name, it doesn't *move* a value into a register, but *copies* it, preserving the original.
+
+某些指令有相同的助记符，但是不同的操作数类型。这种情况下，它们被认为是不同的指令，因为它们可能执行略微不同的操作 或者花费不同的时间来执行。
 
 When used to copy data between two registers, the `mov` instruction instead performs *register renaming* internally — informs the CPU that the value referred by register X is actually stored in register Y — without causing any additional delay except for maybe reading and decoding the instruction itself. For the same reason, the `xchg` instruction that swaps two registers also doesn't cost anything.
 
