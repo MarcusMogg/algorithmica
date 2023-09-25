@@ -1,13 +1,12 @@
 
-CPUs are controlled with *machine language*, which is just a stream of binary-encoded instructions that specify
-CPU 由机器语言控制。机器语言就是一串二进制编码的
-- the instruction number (called *opcode*),
-- what its *operands* are (if there are any),
-- and where to store the *result* (if one is produced).
+CPU 由机器语言控制。机器语言就是二进制编码的指令流，指定：
+- 指令码 ( *opcode*),
+- 操作数,
+- 存储结果的位置（如果有）.
 
-A much more human-friendly rendition of machine language, called *assembly language*, uses mnemonic codes to refer to machine code instructions and symbolic names to refer to registers and other storage locations.
+汇编是一种更人性化的机器语言“翻译”，使用助记符（Mnemonics）来代替和表示特定机器语言的指令，使用符号名称（Symbolic names）标记成为存储器地址以及其它的存储位置
 
-Jumping right into it, here is how you add two numbers (`*c = *a + *b`) in Arm assembly:
+下面是 Arm 汇编来表示 (`*c = *a + *b`) :
 
 ```nasm
 ; *a = x0, *b = x1, *c = x2
@@ -17,7 +16,7 @@ add w0, w0, w1  ; add w0 with w1 and save the result to w0
 str w0, [x2]    ; write contents of w0 to wherever x2 points
 ```
 
-Here is the same operation in x86 assembly:
+ x86 汇编:
 
 ```nasm
 ; *a = rsi, *b = rdi, *c = rdx 
@@ -26,15 +25,13 @@ add eax, DWORD PTR [rdi]  ; add whatever is stored at rdi to eax
 mov DWORD PTR [rdx], eax  ; write contents of eax to wherever rdx points
 ```
 
-Assembly is very simple in the sense that it doesn't have many syntactical constructions compared to high-level programming languages. From what you can observe from the examples above:
+汇编非常简单，和高级语言比 没有复杂的语法结构。从上面的例子可以观察到：
 
-- A program is a sequence of instructions, each written as its name followed by a variable number of operands.
-- The `[reg]` syntax is used for "dereferencing" a pointer stored in a register, and on x86 you need to prefix it with size information (`DWORD` here means 32 bit).
-- The `;` sign is used for line comments, similar to `#` and `//` in other languages.
+-  程序是一系列指令，每个指令都是 指令名称，后跟可变数量的操作数。
+-  `[reg]` 符号用于 "解引用" 存储在寄存器的指针, 在x86你需要在前面指定大小信息 (`DWORD`表示 32 bit).
+-  `;`用于注释
 
-Assembly is a very minimal language because it needs to be. It reflects the machine language as closely as possible, up to the point where there is almost 1:1 correspondence between machine code and assembly. In fact, you can turn any compiled program back into its assembly form using a process called *disassembly*[^disassembly] — although everything non-essential like comments will not be preserved.
-
-[^disassembly]: On Linux, to disassemble a compiled program, you can call `objdump -d {path-to-binary}`.
+汇编是一种非常简约的语言。它尽可能的反应机器语言，直到 和机器码之间一一对应。事实上，你可以使用 反汇编程序 将任意已编译的程序变为 汇编形式，不过像注释之类的不必要内容不会被保留。
 
 Note that the two snippets above are not just syntactically different. Both are optimized codes produced by a compiler, but the Arm version uses 4 instructions, while the x86 version uses 3. The `add eax, [rdi]` instruction is what's called *fused instruction* that does a load and an add in one go — this is one of the perks that the [CISC](../isa#risc-vs-cisc) approach can provide.
 
