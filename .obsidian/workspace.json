@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "002-architecture/README.md",
+                "file": "002-architecture/isa.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "002-architecture/README.md",
+                "file": "002-architecture/isa.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "002-architecture/README.md",
+                "file": "002-architecture/isa.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "002-architecture/README.md"
+                "file": "002-architecture/isa.md"
               }
             }
           }
@@ -146,14 +146,14 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "1a44722d7966affd",
+  "active": "f14312167425e2e5",
   "lastOpenFiles": [
     "_sidebar.md",
+    "002-architecture/README.md",
     "002-architecture/img/pdf.png",
     "002-architecture/img/clt.png",
     "002-architecture/img/monte-carlo.gif",
     "002-architecture/img/birthday.png",
-    "002-architecture/README.md",
     "002-architecture/layout.md",
     "002-architecture/loops.md",
     "002-architecture/isa.md",

@@ -8,8 +8,8 @@
 
 - [2.计算机体系结构](002-architecture/)
 
-    - [2.1. Instruction Set Architectures]()
-    - [2.2. Assembly Language]()
+    - [2.1. 指令集](002-architecture/isa.md)
+    - [2.2. 汇编语言](002-architecture/assembly.md)
     - [2.3. Loops and Conditionals]()
     - [2.4. Functions and Recursion]()
     - [2.5. Indirect Branching]()

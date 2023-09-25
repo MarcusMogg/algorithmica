@@ -1,21 +1,18 @@
----
-title: Instruction Set Architectures
-weight: -1
----
 
-As software engineers, we absolutely love building and using abstractions.
+作为一个软件工程师，我们当然喜欢构建和使用抽象
 
-Just imagine how much stuff happens when you load a URL. You type something on a keyboard; key presses are somehow detected by the OS and get sent to the browser; browser parses the URL and asks the OS to make a network request; then comes DNS, routing, TCP, HTTP, and all the other OSI layers; browser parses HTML; JavaScript works its magic; some representation of a page gets sent over to GPU for rendering; image frames get sent to the monitor… and each of these steps probably involves doing dozens of more specific things in the process.
+想象一下，加载URL的时候会发生多少事。你在键盘上输入内容； OS通过某种方式检测到键盘按下，并发送给浏览器；浏览器建解析URL，并通过OS发送网络请求；然后是DNS，路由，TCP，HTTP和所有其他OSI层；浏览器解析HTML；JavaScript开始工作 ；页面的某些表示形式被送到GPU进行渲染；图片帧被送到显示器…… 这些步骤中的每一步可能涉及 在进程中做数十件具体的事
 
-Abstractions help us in reducing all this complexity down to a single *interface* that describes what a certain *module* can do without fixing a concrete implementation. This provides double benefits:
+抽象帮助我们将所有这些复杂度降低到一个接口中，接口描述了某个具体模块在不涉及具体实现的情况下能做什么。这提供了两个好处：
 
-- Engineers working on higher-level modules only need to know the (much smaller) interface.
-- Engineers working on the module itself get the freedom to optimize and refactor its implementation as long as it complies with its *contracts*.
+- 从事高层级模块的工程师 只需要知道底层级的接口
+- 工程师可以随意优化和重构当前模块，只需要最后编译产物符合契约
 
-Hardware engineers love abstractions too. An abstraction of a CPU is called an *instruction set architecture* (ISA), and it defines how a computer should work from a programmer's perspective. Similar to software interfaces, it gives computer engineers the ability to improve on existing CPU designs while also giving its users — us, programmers — the confidence that things that worked before won't break on newer chips.
+硬件工程师同样喜欢抽象。CPU的一个抽象被称为 指令集架构（ *instruction set architecture* ISA），它描述了在程序员 的视角下 CPU应该如何工作。和软件接口类似，它使计算机工程师能够改进现有的CPU设计，同时也让用户（程序员）相信以前可以工作的东西不会在新芯片上挂掉。
 
 An ISA essentially defines how the hardware should interpret the machine language. Apart from instructions and their binary encodings, an ISA also defines the counts, sizes, and purposes of registers, the memory model, and the input/output model. Similar to software interfaces, ISAs can be extended too: in fact, they are often updated, mostly in a backward-compatible way, to add new and more specialized instructions that can improve performance.
 
+ISA 定义了硬件应该如何解释机器码。
 ### RISC vs CISC
 
 Historically, there have been many competing ISAs in use. But unlike [character encodings and instant messaging protocols](https://xkcd.com/927/), developing and maintaining a completely separate ISA is costly, so mainstream CPU designs ended up converging to one of the two families:
