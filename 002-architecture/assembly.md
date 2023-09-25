@@ -33,13 +33,13 @@ mov DWORD PTR [rdx], eax  ; write contents of eax to wherever rdx points
 
 汇编是一种非常简约的语言。它尽可能的反应机器语言，直到 和机器码之间一一对应。事实上，你可以使用 反汇编程序 将任意已编译的程序变为 汇编形式，不过像注释之类的不必要内容不会被保留。
 
-Note that the two snippets above are not just syntactically different. Both are optimized codes produced by a compiler, but the Arm version uses 4 instructions, while the x86 version uses 3. The `add eax, [rdi]` instruction is what's called *fused instruction* that does a load and an add in one go — this is one of the perks that the [CISC](../isa#risc-vs-cisc) approach can provide.
+请注意，上面两份代码片段不仅是语法不同，两者都是编译器优化后产生的代码，x86使用3条指令但是arm 使用4条。`add eax, [rdi]` 指令是 *融合指令fused instruction* ，一次性执行加载和 加法，这是使用CISC 提供的好处
 
-Since there are far more differences between the architectures than just this one, from here on and for the rest of the book we will only provide examples for x86, which is probably what most of our readers will optimize for, although many of the introduced concepts will be architecture-agnostic.
+由于架构之间的差异远不止这个，从这里开始和本书的其余部分，我们将只提供 x86 的示例，这可能是我们大多数读者会优化的内容，尽管许多引入的概念将与架构无关。
+### 指令和寄存器
 
-### Instructions and Registers
 
-For historical reasons, instruction mnemonics in most assembly languages are very terse. Back when people used to write assembly by hand and repeatedly wrote the same set of common instructions, one less character to type was one step away from insanity.
+处于历史原因，汇编语言中的指令助记符非常简洁。当时人们习惯于手写汇编并反复编写同一组通用指令时，少输入一个字符就远离精神错乱一步。
 
 For example, `mov` is for "store/load a word," `inc` is for "increment by 1," `mul` is for "multiply," and `idiv` is for "integer division." You can look up the description of an instruction by its name in [one of x86 references](https://www.felixcloutier.com/x86/), but most instructions do what you'd think they do.
 
