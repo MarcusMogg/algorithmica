@@ -10,7 +10,7 @@
 
     - [2.1. 指令集](002-architecture/isa.md)
     - [2.2. 汇编语言](002-architecture/assembly.md)
-    - [2.3. Loops and Conditionals]()
+    - [2.3. 循环和条件](002-architecture/loops.md)
     - [2.4. Functions and Recursion]()
     - [2.5. Indirect Branching]()
     - [2.6. Machine Code Layout]()

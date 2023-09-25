@@ -95,14 +95,15 @@ SIZE PTR [base + index * scale + displacement]
 
 ## 选择语法
 
-There are actually multiple *assemblers* (the programs that produce machine code from assembly) with different assembly languages, but only two x86 syntaxes are widely used now. They are commonly called after the two companies that used them and had a dominant influence on programming during that era:
+实际上有多个汇编器（从汇编生成机器代码的程序）对应不同的汇编语言，但现在只有两种x86语法被广泛使用。它们通常以使用它们并在那个时代对编程产生主导影响的两家公司的名字命名：
 
-- The *AT&T syntax*, used by default by all Linux tools.
-- The *Intel syntax*, used by default, well, by Intel.
+-  *AT&T syntax*, Linux工具默认使用.
+-  *Intel syntax*, Intel 默认使用.
 
-These syntaxes are also sometimes called *GAS* and *NASM* respectively, by the names of the two primary assemblers that use them (*GNU Assembler* and *Netwide Assembler*).
 
-We used Intel syntax in this chapter and will continue to preferably use it for the rest of the book. For comparison, here is how the same `*c = *a + *b` example looks like in AT&T asm:
+这些语法有时也分别称为 GAS 和 NASM，由使用它们的两个主要汇编器（GNU 汇编器和 Netwide 汇编器）的名称命名
+
+这本书使用Intel 语法. 作为对比下面是 `*c = *a + *b` 在 AT&T 中的表示:
 
 ```asm
 movl (%rsi), %eax
@@ -110,14 +111,14 @@ addl (%rdi), %eax
 movl %eax, (%rdx)
 ```
 
-The key differences can be summarized as follows:
+主要区别可总结如下：
 
-1. The *last* operand is used to specify the destination.
-2. Registers and constants need to be prefixed by `%` and `$` respectively (e.g., `addl $1, %rdx` increments `rdx`).
-3. Memory addressing looks like this: `displacement(%base, %index, scale)`.
-4. Both `;` and `#` can be used for line comments, and also `/* */` can be used for block comments.
+1. 1. 最后一个操作数用于指定目标。
+2. 寄存器和常量需要分别以 和 `$` 为 `%` 前缀（例如， `addl $1, %rdx` 增加 `rdx` ）.
+3. 内存寻址： `displacement(%base, %index, scale)` 。
+4.  `;` `#` 可用于行注释， `/* */` 可用于块注释。
 
-And, most importantly, in AT&T syntax, the instruction names need to be "suffixed" (`addq`, `movl`, `cmpq`, etc.) to specify what size operands are being manipulated:
+最重要的是，在AT&T语法中，指令名称需要“后缀”（ `addq` ， `movl` ， `cmpq` 等）以指定操作数的大小：
 
 - `b` = byte (8 bit)
 - `w` = word (16 bit)
@@ -126,6 +127,5 @@ And, most importantly, in AT&T syntax, the instruction names need to be "suffixe
 - `s` = single (32-bit floating-point)
 - `t` = ten bytes (80-bit floating-point)
 
-In Intel syntax, this information is inferred from operands (which is why you also need to specify sizes of pointers).
+在 Intel 语法中，此信息是从操作数推断出来的（这就是为什么需要指定指针的大小）。
 
-Most tools that produce or consume x86 assembly can do so in both syntaxes, so you can just pick the one you like more and don't worry.
