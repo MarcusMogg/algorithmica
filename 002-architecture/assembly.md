@@ -55,33 +55,28 @@ mov DWORD PTR [rdx], eax  ; write contents of eax to wherever rdx points
 
 ## Moving Data
 
-Some instructions may have the same mnemonic, but have different operand types, in which case they are considered distinct instructions as they may perform slightly different operations and take different times to execute. The `mov` instruction is a vivid example of that, as it comes in around 20 different forms, all related to moving data: either between the memory and registers or just between two registers. Despite the name, it doesn't *move* a value into a register, but *copies* it, preserving the original.
 
 某些指令有相同的助记符，但是不同的操作数类型。这种情况下，它们被认为是不同的指令，因为它们可能执行略微不同的操作 或者花费不同的时间来执行。
 
-When used to copy data between two registers, the `mov` instruction instead performs *register renaming* internally — informs the CPU that the value referred by register X is actually stored in register Y — without causing any additional delay except for maybe reading and decoding the instruction itself. For the same reason, the `xchg` instruction that swaps two registers also doesn't cost anything.
+`mov`指令是一个鲜明的例子，他大概有20种不同的形式，全是关于 移动数据：可能是在内存和寄存器之间，也可以是在寄存器和寄存器之间。
 
-As we've seen above with the fused `add`, you don't have to use `mov` for every memory operation: some arithmetic instructions conveniently support memory locations as operands.
+尽管名字是 移动 ,但事实上 它是原样拷贝数据。
 
-<!--
+当用于在两个寄存器之间复制数据时， `mov` 指令改为在内部执行寄存器重命名 - 通知CPU寄存器X引用的值实际上存储在寄存器Y中 - 除了可能读取和解码指令本身之外，不会造成任何额外的延迟。出于同样的原因，交换两个寄存器的 `xchg` 指令也不需要任何费用。
 
-Some operations are fused like `add r m` or `inc m` (this is one of the rare instructions that doesn't use any register values as operands).
+正如我们在上面看到的 `add` 融合指令 ，您不必为 每个内存操作 使用`mov`：一些算术指令支持内存位置作为操作数。
 
-When address is used,
+## 寻址模式
 
-Mirroring
-
--->
-
-### Addressing Modes
-
-Memory addressing is done with the `[]` operator, but it can do more than just reinterpret a value stored in a register as a memory location. The address operand takes up to 4 parameters presented in the syntax:
+内存寻址 由 `[]` 操作符完成， 它做的不仅仅是把 存储在寄存器中的值解释为内存地址。地址操作数最多接受下面表达式中的四个参数。
 
 ```
 SIZE PTR [base + index * scale + displacement]
 ```
 
-where `displacement` needs to be an integer constant and `scale` can be either 2, 4, or 8. What it does is calculate the pointer `base + index * scale + displacement` and dereferences it.
+ `displacement` 需要是整数常量
+ `scale` 可以是 2, 4, or 8.
+  他执行的操作是计算 `base + index * scale + displacement` 然后接引用
 
 <!-- You can use them in any order: the assembler will figure it out. -->
 
