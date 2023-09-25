@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "002-architecture/isa.md",
+                "file": "002-architecture/assembly.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "002-architecture/isa.md",
+                "file": "002-architecture/assembly.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "002-architecture/isa.md",
+                "file": "002-architecture/assembly.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "002-architecture/isa.md"
+                "file": "002-architecture/assembly.md"
               }
             }
           }
@@ -148,6 +148,7 @@
   },
   "active": "f14312167425e2e5",
   "lastOpenFiles": [
+    "002-architecture/isa.md",
     "_sidebar.md",
     "002-architecture/README.md",
     "002-architecture/img/pdf.png",
@@ -156,7 +157,6 @@
     "002-architecture/img/birthday.png",
     "002-architecture/layout.md",
     "002-architecture/loops.md",
-    "002-architecture/isa.md",
     "002-architecture/interaction.md",
     "002-architecture/indirect.md",
     "002-architecture/functions.md",
