@@ -18,9 +18,9 @@ loop:
 
 汇编不像高级语言这样有 `if`, `for` , 函数 或者其他控制流结构，只有`goto` 或者叫“jump”
 
-**Jump** moves the instruction pointer to a location specified by its operand. This location may be either an absolute address in memory, relative to the current address or even [computed during runtime](../indirect). To avoid the headache of managing these addresses directly, you can mark any instruction with a string followed by `:`, and then use this string as a label which gets replaced by the relative address of this instruction when converted to machine code.
+ To avoid the headache of managing these addresses directly, you can mark any instruction with a string followed by `:`, and then use this string as a label which gets replaced by the relative address of this instruction when converted to machine code.
 
-**Jump** 将指令指针移动到其操作数所指定的位置。这个位置可以是内存中的绝对地址，也可以是相对当前位置的地址，还可以值
+**Jump** 将指令指针移动到其操作数所指定的位置。这个位置可以是内存中的绝对地址，也可以是相对当前位置的地址，还可以是运行时计算的值
 
 Labels can be any string, but compilers don't get creative and [typically](https://godbolt.org/z/T45x8GKa5) just use the line numbers in the source code and function names with their signatures when picking names for labels.
 
