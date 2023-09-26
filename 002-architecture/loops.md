@@ -18,13 +18,12 @@ loop:
 
 汇编不像高级语言这样有 `if`, `for` , 函数 或者其他控制流结构，只有`goto` 或者叫“jump”
 
- To avoid the headache of managing these addresses directly, you can mark any instruction with a string followed by `:`, and then use this string as a label which gets replaced by the relative address of this instruction when converted to machine code.
+**Jump** 将指令指针移动到其操作数所指定的位置。这个位置可以是内存中的绝对地址，也可以是相对当前位置的地址，还可以是运行时计算的值。
+为了避免直接管理内存的头疼，你可以在任意指令前 用 后面跟着 `:`的 字符串  来标记，然后你就可以使用 这个字符串作为标签。在转换成机器码时，标签会转换为相对地址。
 
-**Jump** 将指令指针移动到其操作数所指定的位置。这个位置可以是内存中的绝对地址，也可以是相对当前位置的地址，还可以是运行时计算的值
+标签可以是任意值，但编译器不是具有创造性的，在为标签选择名称时，[通常](https://godbolt.org/z/T45x8GKa5)只使用源代码中的行号和带有签名的函数名称。
 
-Labels can be any string, but compilers don't get creative and [typically](https://godbolt.org/z/T45x8GKa5) just use the line numbers in the source code and function names with their signatures when picking names for labels.
-
-**Unconditional** jump `jmp` can only be used to implement `while (true)` kind of loops or stitch parts of a program together. A family of **conditional** jumps is used to implement actual control flow.
+无条件跳转`jmp` 只能用于实现 `while(true)` 或者 switch 之类的。一系列 条件跳转 用于实现真实的控制流。
 
 It is reasonable to think that these conditions are computed as `bool`-s somewhere and passed to conditional jumps as operands: after all, this is how it works in programming languages. But that is not how it is implemented in hardware. Conditional operations use a special `FLAGS` register, which first needs to be populated by executing instructions that perform some kind of check.
 
