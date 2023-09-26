@@ -23,11 +23,12 @@ loop:
 
 标签可以是任意值，但编译器不是具有创造性的，在为标签选择名称时，[通常](https://godbolt.org/z/T45x8GKa5)只使用源代码中的行号和带有签名的函数名称。
 
-无条件跳转`jmp` 只能用于实现 `while(true)` 或者 switch 之类的。一系列 条件跳转 用于实现真实的控制流。
+无条件跳转`jmp` 只能用于实现 `while(true)` 或者 switch 之类的。一系列 **条件跳转** 用于实现真实的控制流。
 
-It is reasonable to think that these conditions are computed as `bool`-s somewhere and passed to conditional jumps as operands: after all, this is how it works in programming languages. But that is not how it is implemented in hardware. Conditional operations use a special `FLAGS` register, which first needs to be populated by executing instructions that perform some kind of check.
+可以合理的认为将 条件计算为bool然后传递给 条件跳转指令作为操作数：毕竟，编程语言就是这样运行的。但是，硬件不是这样实现的。条件判断操作使用了一个特殊的寄存器`FLAG`, 首先需要通过执行某种检查的指令来填充该寄存器
 
-In our example, `cmp rax, rcx` compares the iterator `rax` with the end-of-array pointer `rcx`. This updates the `FLAGS` register, and now it can be used by `jne loop`, which looks up a certain bit there that tells whether the two values are equal or not, and then either jumps back to the beginning or continues to the next instruction, thus breaking the loop.
+在我们的例子中，`cmp rax, rcx` 比较了迭代器`rax`和 数组结束指针 `rcx`。这会更新寄存器，然后就可以使用 `jne loop`。 它会查找指定的位，然后告诉我们 这两个值倒是是不是相等，然后跳转回循环开始 或者继续执行下一条指令（即跳出循环）
+
 
 ### Loop Unrolling
 
