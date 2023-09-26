@@ -1,9 +1,5 @@
----
-title: Loops and Conditionals
-weight: 2
----
 
-Let's consider a slightly more complex example:
+来看一个稍微复杂一点的例子
 
 ```nasm
 loop:
@@ -13,15 +9,18 @@ loop:
     jne  loop
 ```
 
-It calculates the sum of a 32-bit integer array, just as a simple `for` loop would.
+一个简单的`for` 循环 计算 32-bit 整数数组的和。
 
-The "body" of the loop is `add edx, DWORD PTR [rax]`: this instruction loads data from the iterator `rax` and adds it to the accumulator `edx`. Next, we move the iterator 4 bytes forward with `add rax, 4`. Then, a slightly more complicated thing happens.
+循环体是 `add edx, DWORD PTR [rax]`: 这个指令从迭代器 `rax` 加载数据，然后累加到 `edx`. 接着迭代器移动4字节 `add rax, 4`. 最后发生了稍微复杂的事.
 
-### Jumps
+## 跳转 Jumps
 
-Assembly doesn't have if-s, for-s, functions, or other control flow structures that high-level languages have. What it does have is `goto`, or "jump," how it is known in the world of low-level programming.
+
+汇编不像高级语言这样有 `if`, `for` , 函数 或者其他控制流结构，只有`goto` 或者叫“jump”
 
 **Jump** moves the instruction pointer to a location specified by its operand. This location may be either an absolute address in memory, relative to the current address or even [computed during runtime](../indirect). To avoid the headache of managing these addresses directly, you can mark any instruction with a string followed by `:`, and then use this string as a label which gets replaced by the relative address of this instruction when converted to machine code.
+
+**Jump** 将指令指针移动到其操作数所指定的位置。这个位置可以是内存中的绝对地址，也可以是相对当前位置的地址，还可以值
 
 Labels can be any string, but compilers don't get creative and [typically](https://godbolt.org/z/T45x8GKa5) just use the line numbers in the source code and function names with their signatures when picking names for labels.
 
