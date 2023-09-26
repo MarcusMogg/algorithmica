@@ -30,7 +30,7 @@ loop:
 在我们的例子中，`cmp rax, rcx` 比较了迭代器`rax`和 数组结束指针 `rcx`。这会更新寄存器，然后就可以使用 `jne loop`。 它会查找指定的位，然后告诉我们 这两个值倒是是不是相等，然后跳转回循环开始 或者继续执行下一条指令（即跳出循环）
 
 
-### Loop Unrolling
+## 循环展开
 
 One thing you might have noticed about the loop above is that there is a lot of overhead to process a single element. During each cycle, there is only one useful instruction executed, and the other 3 are incrementing the iterator and trying to find out if we are done yet.
 
