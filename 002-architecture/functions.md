@@ -8,7 +8,9 @@ To "call a function" in assembly, you need to [jump](../loops) to its beginning 
 
 Both of these concerns can be solved by having a dedicated location in memory where we can write all the information we need to return from the function before calling it. This location is called *the stack*.
 
-### The Stack
+这两个问题都可以使用内存中一个专用位置来解决，我们可以 在调用函数之前 向其中写入 所有需要返回的信息。这个位置叫做**栈**
+
+## 栈
 
 The hardware stack works the same way software stacks do and is similarly implemented as just two pointers:
 
