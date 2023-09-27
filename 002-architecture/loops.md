@@ -70,7 +70,7 @@ loop:
 
 For example, `add` always sets a number of flags, denoting whether the result is zero, is negative, whether an overflow or an underflow occurred, and so on. Taking advantage of this mechanism, compilers often produce loops like this:
 
-例如，`add` 往往设置一系列寄存器，取决于结果是 0、是负数、是否发生溢出……
+例如，`add` 往往设置一系列寄存器，取决于结果是 0、是负数、是否发生溢出…… 利用这种机制，编译器通常产生下面 的循环
 
 ```nasm
     mov  rax, -100  ; replace 100 with the array size
@@ -80,5 +80,4 @@ loop:
     jnz  loop       ; checks if the result is zero
 ```
 
-This code is a bit harder to read for a human, but it is one instruction shorter in the repeated part, which may meaningfully affect performance.
-
+这份代码对人类来说有点难读，但是它的循环部分少了一条指令，这可能对性能产生有益的影响

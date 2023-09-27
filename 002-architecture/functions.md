@@ -1,13 +1,10 @@
----
-title: Functions and Recursion
-weight: 3
-published: true
----
 
 To "call a function" in assembly, you need to [jump](../loops) to its beginning and then jump back. But then two important problems arise:
 
-1. What if the caller stores data in the same registers as the callee?
-2. Where is "back"?
+在汇编中实现 "函数调用"，需要先跳转到函数开头，函数结束时跳回。但这会产生两个问题：
+
+1. 如果调用方将数据存储在与被调方相同的寄存器中，该怎么办？
+2. 跳回哪里?
 
 Both of these concerns can be solved by having a dedicated location in memory where we can write all the information we need to return from the function before calling it. This location is called *the stack*.
 
