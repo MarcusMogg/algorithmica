@@ -32,9 +32,9 @@ loop:
 
 ## 循环展开
 
-One thing you might have noticed about the loop above is that there is a lot of overhead to process a single element. During each cycle, there is only one useful instruction executed, and the other 3 are incrementing the iterator and trying to find out if we are done yet.
+你可能已经注意到，上面的循环处理单个元素有许多额外开销。每个循环中只有一个指令有用，其他三个指令都是用于处理循环是否结束
 
-What we can do is to *unroll* the loop by grouping iterations together — equivalent to writing something like this in C:
+我们可以把这个循环展开（*unroll* ），等价于下面的c代码
 
 ```c++
 for (int i = 0; i < n; i += 4) {
@@ -45,7 +45,7 @@ for (int i = 0; i < n; i += 4) {
 }
 ```
 
-In assembly, it would look something like this:
+汇编：
 
 ```nasm
 loop:
@@ -58,17 +58,19 @@ loop:
     jne  loop
 ```
 
-Now we only need 3 loop control instructions for 4 useful ones (an improvement from $\frac{1}{4}$ to $\frac{4}{7}$ in terms of efficiency), and this can be continued to reduce the overhead almost to zero.
+先在有 3 个循环控制指令， 4 个有用的指令 (从$\frac{1}{4}$ 提升到 $\frac{4}{7}$ ), 这可以继续 展开直到额外负载为0.
 
-In practice, unrolling loops isn't always necessary for performance because modern processors don't actually execute instructions one-by-one, but maintain a [queue of pending instructions](/hpc/pipelining) so that two independent operations can be executed concurrently without waiting for each other to finish.
+但在实践中，循环展开对性能往往不是必要的，因为现代处理器不是一条一条执行指令的，而是维护指令队列，所以可以并行执行两条无关的操作，而不用等待彼此操作完成。
 
-This is our case too: the real speedup from unrolling won't be fourfold, because the operations of incrementing the counter and checking if we are done are independent from the loop body, and can be scheduled to run concurrently with it. But may still be beneficial to [ask the compiler](/hpc/compilation/situational) to unroll it to some extent.
+对我们的例子也是如此，循环展开 对速度的提升不会有四倍（~~实测约等于没有~~），因为递增和检查指令 独立于循环体，所以可以并行执行。但要求编译器在某种程度上展开它可能仍然是有益的。
 
-### An Alternative Approach
+## 一个替代方法
 
-You don't have to explicitly use `cmp` or a similar instruction to make a conditional jump. Many other instructions either read or modify the `FLAGS` register, sometimes as a by-product enabling optional exception checks.
+不必显示使用`cmp`或者其他相似的指令来进行条件跳转。还有许多其他的指令可以读写 `FLAGS`寄存器，有时作为副产品 启用可选的异常检查。
 
 For example, `add` always sets a number of flags, denoting whether the result is zero, is negative, whether an overflow or an underflow occurred, and so on. Taking advantage of this mechanism, compilers often produce loops like this:
+
+例如，`add` 往往设置一系列寄存器，取决于结果是 0、是负数、是否发生溢出……
 
 ```nasm
     mov  rax, -100  ; replace 100 with the array size
@@ -80,50 +82,3 @@ loop:
 
 This code is a bit harder to read for a human, but it is one instruction shorter in the repeated part, which may meaningfully affect performance.
 
-<!--
-
-### A More Complex Example
-
-Let's do a more complicated example.
-
-```c++
-int collatz(int n) {
-    int cnt = 0;
-    while (n != 1) {
-        cnt++;
-        if (n & 2 == 1)
-            n = 3 * n + 1;
-        else
-            n = n / 2;
-    }
-    return cnt;
-}
-```
-
-It is a notoriously difficult math problem that seems ridiculously simple.
-
-Make use of [lea instruction](../assembly).
-
-E.g., if you want to make a computational experiment [Collatz conjecture](https://en.wikipedia.org/wiki/Collatz_conjecture), you may use `lea rax, [rax + rax * 2 + 1]`, and then try to `sar` it.
-
-Another way is to check add.
-
-Eliminating branching. Or at least making it easier for the compiler to predict which instructions are going to be executed next.
-
-tzcnt
-
-cmov
-
-Need to somehow link it to branchless programming and layout article. We now have 3 places introducing the concept.
-
-Many other operations set something in the `FLAGS` register. For example, add often. It is useful to, and then decrement or increment it to save on instruction. Like a while loop:
-
-```
-while (n--) {
-    // ...
-}
-```
-
-There is an important "conditional move" operation.
-
--->
