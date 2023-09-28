@@ -50,32 +50,7 @@ jmp rcx
 
 The memory region between `rbp` and `rsp` is called a *stack frame*, and this is where local variables of functions are typically stored. It is pre-allocated at the start of the program, and if you push more data on the stack than its capacity (8MB by default on Linux), you encounter a *stack overflow* error. Because modern operating systems don't actually give you memory pages until you read or write to their address space, you can freely specify a very large stack size, which acts more like a limit on how much stack memory can be used, and not a fixed amount every program has to use.
 
-<!--
-
-It is convenient to save the frame pointer `rbp` at the beginning of a function and replace it with `rsp` — this way, when leaving a function, you could just restore `rbp` and forget about all its local variables. This sequence is called *function prologue* and usually looks somewhat like that (which is often optimized away by the compiler):
-
-```nasm
-push rbp     ; preserve the current frame pointer
-mov rbp, rsp ; create a new frame pointer pointing to the current top of the stack
-sub rsp, 20  ; allocate 20 bytes worth of locals on stack
-```
-
--->
-
-<!--
-The memory region dedicated for stack memory (called *stack frame*) is not any different from any other memory region. It is allocated on the start of the program. You could also do tricky stuff, such as 
-
-Functions execute a *prologue* which usually looks somewhat like that:
-
-```nasm
-push rbp     ; preserve the current frame pointer
-mov rbp, rsp ; create a new frame pointer pointing to the current top of the stack
-sub rsp, 20  ; allocate 20 bytes worth of locals on stack
-```
-
-Note that the data in the stack is written top-to-bottom. This is just a convention: it could be the other way around. When you need to "leave" a function or a visibility scope such as the body of an `if` or a `for`, you can just increase the stack pointer.
-
--->
+`rbp` 和 `rsp`之间的内存区域被称为栈帧 *stack frame*, 这是函数局部变量通常存储的位置。它在程序启动时预先分配好，如果向栈上push 超过栈大小（linux默认8MB）的数据，会遇到栈溢出 *stack overflow*。 因为现代操作系统 在你读写内存地址之前并不会真 的
 
 ### Calling Conventions
 
