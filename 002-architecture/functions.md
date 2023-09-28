@@ -17,32 +17,18 @@ Both of these concerns can be solved by having a dedicated location in memory wh
 - 基指针 标记栈底，通常存储在寄存器 `rbp`.
 - 栈指针 标记栈最后一个元素（栈底），通常存储在寄存器`rsp`.
 
-When you need to call a function, you push all your local variables onto the stack (which you can also do in other circumstances; e.g., when you run out of registers), push the current instruction pointer, and then jump to the beginning of the function. When exiting from a function, you look at the pointer stored on top of the stack, jump there, and then carefully read all the variables stored on the stack back into their registers.
+当你调用一个函数时，你需要把所有本地变量 `push` 到栈上（当然在其他情况下也可以这样做，比如 寄存器不够用时），然后`push` 当前指令指针，接着跳转到函数开始。
 
-<!--
+当退出函数时，查找栈底元素，然后跳转到那里，接着小心地 将所有存储在栈中的变量读回其寄存器。
 
-Function parameters and local variables are accessed by adding and subtracting, respectively, a constant offset from `ebp`.
+你可以使用通常的内存操作指令和 跳转来实现所有操作，但是因为使用频繁，这里有四个指令专门用于实现：
 
-ebp itself actually points to the previous frame's base pointer, which enables stack walking in a debugger and viewing other frames local variables to work. Fun things, such as stopping the program and seeing which functions are called by which.
+- `push` 将数据写入栈指针的位置，然后 栈指针 减少 
+- `pop`  读栈顶数据，然后 栈指针 增加
+- `call` 将下一条指令写到栈里 ，然后跳转到标签位置.
+- `ret` 读取栈顶的返回位置，然后跳转.
 
-push ebp      ; Preserve current frame pointer
-mov ebp, esp  ; Create new frame pointer pointing to current stack top
-sub esp, 20   ; allocate 20 bytes worth of locals on stack.
-
-frame pointer omission optimization which you can enable will actually eliminate this and use ebp as another register and access locals directly off of esp, but this makes debugging a bit more difficult since the debugger can no longer directly access the stack frames of earlier function calls.
-
-When a function starts, it executed a *function prologue*: saves the previous base pointer on the stack and sets `rbp = rsp`.
-
--->
-
-You can implement all that with the usual memory operations and jumps, but because of how frequently it is used, there are 4 special instructions for doing this:
-
-- `push` writes data at the stack pointer and decrements it.
-- `pop` reads data from the stack pointer and increments it.
-- `call` puts the address of the following instruction on top of the stack and jumps to a label.
-- `ret` reads the return address from the top of the stack and jumps to it.
-
-You would call them "syntactic sugar" if they weren't actual hardware instructions — they are just fused equivalents of these two-instruction snippets:
+你可以叫他们“语法糖”，因为他们不是真正的硬件指令，他们等价于两条指令的融合产物
 
 ```nasm
 ; "push rax"
