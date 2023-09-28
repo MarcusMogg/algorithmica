@@ -50,13 +50,13 @@ jmp rcx
 
 The memory region between `rbp` and `rsp` is called a *stack frame*, and this is where local variables of functions are typically stored. It is pre-allocated at the start of the program, and if you push more data on the stack than its capacity (8MB by default on Linux), you encounter a *stack overflow* error. Because modern operating systems don't actually give you memory pages until you read or write to their address space, you can freely specify a very large stack size, which acts more like a limit on how much stack memory can be used, and not a fixed amount every program has to use.
 
-`rbp` 和 `rsp`之间的内存区域被称为栈帧 *stack frame*, 这是函数局部变量通常存储的位置。它在程序启动时预先分配好，如果向栈上push 超过栈大小（linux默认8MB）的数据，会遇到栈溢出 *stack overflow*。 因为现代操作系统 在你读写内存地址之前并不会真 的
+`rbp` 和 `rsp`之间的内存区域被称为栈帧 *stack frame*, 这是函数局部变量通常存储的位置。它在程序启动时预先分配好，如果向栈上push 超过栈大小（linux默认8MB）的数据，会遇到栈溢出 *stack overflow*。 因为现代操作系统 在你读写内存地址之前并不会真 的分配内存页，所以你可以指定一个巨大的栈大小，它更像是对可以使用多少栈内存的限制，而不是每个程序必须使用的固定数量。
 
-### Calling Conventions
+## 调用约定
 
-The people who develop compilers and operating systems eventually came up with [conventions](https://wiki.osdev.org/Calling_Conventions) on how to write and call functions. These conventions enable some important [software engineering marvels](/hpc/compilation/stages/) such as splitting compilation into separate units, reusing already-compiled libraries, and even writing them in different programming languages.
+编译器和操作系统开发人员提出了如何编写和调用函数的 调用约定[conventions](https://wiki.osdev.org/Calling_Conventions)。这些约定使得一些 重要的软件工程 marvels 成为可能，比如 划分编译单元，重复使用已编译的库，甚至使用不同的语言进行开发
 
-Consider the following example in C:
+考虑下面的C例子:
 
 ```c
 int square(int x) {
@@ -68,41 +68,10 @@ int distance(int x, int y) {
 }
 ```
 
-<!--
-
-When compiled without any optimization flags, it produces the following assembly:
-
-```nasm
-square:
-    push    rbp
-    mov     rbp, rsp
-    mov     DWORD PTR [rbp-4], edi
-    mov     eax, DWORD PTR [rbp-4]
-    imul    eax, eax
-    pop     rbp
-    ret
-length:
-    push    rbp
-    mov     rbp, rsp
-    push    rbx
-    sub     rsp, 8
-    mov     DWORD PTR [rbp-12], edi
-    mov     DWORD PTR [rbp-16], esi
-    mov     eax, DWORD PTR [rbp-12]
-    mov     edi, eax
-    call    square
-    mov     ebx, eax
-    mov     eax, DWORD PTR [rbp-16]
-    mov     edi, eax
-    call    square
-    add     eax, ebx
-    mov     rbx, QWORD PTR [rbp-8]
-    leave
-    ret
-```
--->
 
 By convention, a function should take its arguments in `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9` (and the rest in the stack if those weren't enough), put the return value into `rax`, and then return. Thus, `square`, being a simple one-argument function, can be implemented like this:
+
+契约规定，一个
 
 ```nasm
 square:             ; x = edi, ret = eax
