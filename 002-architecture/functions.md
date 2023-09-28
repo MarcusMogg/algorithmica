@@ -69,9 +69,9 @@ int distance(int x, int y) {
 ```
 
 
-By convention, a function should take its arguments in `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9` (and the rest in the stack if those weren't enough), put the return value into `rax`, and then return. Thus, `square`, being a simple one-argument function, can be implemented like this:
+契约规定，一个函数需要把他的参数放在`rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9` （不够用的话剩下的放在栈上），返回值放在`rax`，然后返回。
 
-契约规定，一个
+所以 `square` 函数可以这样简单的实现：
 
 ```nasm
 square:             ; x = edi, ret = eax
@@ -80,7 +80,7 @@ square:             ; x = edi, ret = eax
     ret
 ```
 
-Each time we call it from `distance`, we just need to go through some trouble preserving its local variables:
+每次从 `distance`调用时, 需要保留其局部变量:
 
 ```nasm
 distance:           ; x = rdi/edi, y = rsi/esi, ret = rax/eax
@@ -103,9 +103,8 @@ distance:           ; x = rdi/edi, y = rsi/esi, ret = rax/eax
     ret
 ```
 
-There are a lot more nuances, but we won't go into detail here because this book is about performance, and the best way to deal with functions calls is actually to avoid making them in the first place.
-
-### Inlining
+还有更多的细微差别，但我们不会在这里详细介绍，因为这本书是关于性能的，处理函数调用的最好方法实际上是首先避免进行调用。
+## Inline
 
 Moving data to and from the stack creates noticeable overhead for small functions like these. The reason you have to do this is that, in general, you don't know whether the callee is modifying the registers where you store your local variables. But when you have access to the code of `square`, you can solve this problem by stashing the data in registers that you know won't be modified.
 
