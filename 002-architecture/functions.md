@@ -48,7 +48,6 @@ pop  rcx ; <- choose any unused register
 jmp rcx
 ```
 
-The memory region between `rbp` and `rsp` is called a *stack frame*, and this is where local variables of functions are typically stored. It is pre-allocated at the start of the program, and if you push more data on the stack than its capacity (8MB by default on Linux), you encounter a *stack overflow* error. Because modern operating systems don't actually give you memory pages until you read or write to their address space, you can freely specify a very large stack size, which acts more like a limit on how much stack memory can be used, and not a fixed amount every program has to use.
 
 `rbp` 和 `rsp`之间的内存区域被称为栈帧 *stack frame*, 这是函数局部变量通常存储的位置。它在程序启动时预先分配好，如果向栈上push 超过栈大小（linux默认8MB）的数据，会遇到栈溢出 *stack overflow*。 因为现代操作系统 在你读写内存地址之前并不会真 的分配内存页，所以你可以指定一个巨大的栈大小，它更像是对可以使用多少栈内存的限制，而不是每个程序必须使用的固定数量。
 
