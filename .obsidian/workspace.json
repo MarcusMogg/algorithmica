@@ -11,8 +11,12 @@
             "id": "18a1f201f0f8bfc3",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "002-architecture/functions.md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
         ]
@@ -81,6 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "002-architecture/functions.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -97,6 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "002-architecture/functions.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -118,7 +124,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "002-architecture/functions.md"
+              }
             }
           }
         ]
@@ -140,20 +148,20 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
-    "data-structures/img/binary-heat.png",
-    "002-architecture/functions.md",
     "002-architecture/interaction.md",
     "002-architecture/assembly.md",
+    "002-architecture/functions.md",
+    "002-architecture/indirect.md",
+    "002-architecture/layout.md",
+    "002-architecture/isa.md",
+    "data-structures/img/binary-heat.png",
     "002-architecture/loops.md",
     "_sidebar.md",
-    "002-architecture/isa.md",
     "002-architecture/README.md",
     "002-architecture/img/pdf.png",
     "002-architecture/img/clt.png",
     "002-architecture/img/monte-carlo.gif",
     "002-architecture/img/birthday.png",
-    "002-architecture/layout.md",
-    "002-architecture/indirect.md",
     "002-architecture/img",
     "002-architecture",
     "001-complexity/levels.md",

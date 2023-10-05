@@ -105,7 +105,7 @@ distance:           ; x = rdi/edi, y = rsi/esi, ret = rax/eax
 还有更多的细微差别，但我们不会在这里详细介绍，因为这本书是关于性能的，处理函数调用的最好方法实际上是首先避免进行调用。
 ## Inline
 
-Moving data to and from the stack creates noticeable overhead for small functions like these. The reason you have to do this is that, in general, you don't know whether the callee is modifying the registers where you store your local variables. But when you have access to the code of `square`, you can solve this problem by stashing the data in registers that you know won't be modified.
+像这些非常小的 函数，从栈上填入 和  读取 造成了非常大的额外开销。这样做的原因是：通常来讲，你不知道被调者正在修改什么寄存器，所以调用前需要暂存到栈上。但是但你访问`square`函数时，你可以通过把数据暂存到你明确知道不会修改的寄存器上 来避免这样的开销
 
 ```nasm
 distance:
@@ -117,7 +117,7 @@ distance:
     ret
 ```
 
-This is better, but we are still implicitly accessing stack memory: you need to push and pop the instruction pointer on each function call. In simple cases like this, we can *inline* function calls by stitching the callee's code into the caller and resolving conflicts over registers. In our example:
+这样更好，但我们还是在隐式的范围 栈内存：每次函数调用 你需要 push 、pop 指令指针。像这个简单的例子，我们可以内联(*inline*)函数调用，即把 被调方的代码在 调用方展开，并解决寄存器冲突。在我们的例子中：
 
 ```nasm
 distance:
@@ -128,7 +128,7 @@ distance:
     ret
 ```
 
-This is fairly close to what optimizing compilers produce out of this snippet — only they use the [lea trick](../assembly) to make the resulting machine code sequence a few bytes smaller:
+这已经非常接近 优化编译器的产物，只是他们会使用 `lea` 来使得最后的机器码更小：
 
 ```nasm
 distance:
@@ -138,11 +138,10 @@ distance:
     ret
 ```
 
-In situations like these, function inlining is clearly beneficial, and compilers mostly do it [automatically](/hpc/compilation/situational), but there are cases when it's not — and we will talk about them [in a bit](../layout).
+像这种情况，函数内联是明确有收益的，通常编译器会自动执行，但有些情况下并非如此，我们之后讨论
+## 尾调用 消除
 
-### Tail Call Elimination
-
-Inlining is straightforward to do when the callee doesn't make any other function calls, or at least if these calls are not recursive. Let's move on to a more complex example. Consider this recursive computation of a factorial:
+在被调者未调用其他函数 或者 至少没有递归 时，inline 是直接了当的。来考虑更复杂的例子，比如下面的阶乘：
 
 ```cpp
 int factorial(int n) {
@@ -152,7 +151,7 @@ int factorial(int n) {
 }
 ```
 
-Equivalent assembly:
+assembly:
 
 ```nasm
 ; n = edi, ret = eax
@@ -170,9 +169,9 @@ nonzero:
     ret
 ```
 
-If the function is recursive, it is still often possible to make it "call-less" by restructuring it. This is the case when the function is *tail recursive*, that is, it returns right after making a recursive call. Since no actions are required after the call, there is also no need for storing anything on the stack, and a recursive call can be safely replaced with a jump to the beginning — effectively turning the function into a loop.
+如果函数是递归的，通常不可能重新组织 使得 其 无调用（"call-less"）。但当函数是 *尾递归*的，即在执行调用后直接return 时，由于无需在调用后执行任何操作，所以也不需要在栈上保留任何东西，递归调用可以安全的替换为跳转到函数开始的地方——相当于把函数转换为loop
 
-To make our `factorial` function tail-recursive, we can pass a "current product" argument to it:
+为了使我们的`factorial` 函数变成 尾递归的，我们可以在参数里传递一个 当前乘积：
 
 ```cpp
 int factorial(int n, int p = 1) {
@@ -182,7 +181,7 @@ int factorial(int n, int p = 1) {
 }
 ```
 
-Then this function can be easily folded into a loop:
+这个函数可以简单的转换为 loop：
 
 ```nasm
 ; assuming n > 0
@@ -196,3 +195,5 @@ loop:
 ```
 
 The primary reason why recursion can be slow is that it needs to read and write data to the stack, while iterative and tail-recursive algorithms do not. This concept is very important in functional programming, where there are no loops and all you can use are functions. Without tail call elimination, functional programs would require way more time and memory to execute.
+
+递归慢的主要原因是需要在栈上 读写数据，但是 迭代和 尾递归算法不需要。这个概念在函数式编程中十分重要，因为其没有循环 只能用函数。没有尾调用消除，函数式编程 将会消耗更多的资源来执行
