@@ -194,6 +194,5 @@ loop:
     ret
 ```
 
-The primary reason why recursion can be slow is that it needs to read and write data to the stack, while iterative and tail-recursive algorithms do not. This concept is very important in functional programming, where there are no loops and all you can use are functions. Without tail call elimination, functional programs would require way more time and memory to execute.
 
 递归慢的主要原因是需要在栈上 读写数据，但是 迭代和 尾递归算法不需要。这个概念在函数式编程中十分重要，因为其没有循环 只能用函数。没有尾调用消除，函数式编程 将会消耗更多的资源来执行
