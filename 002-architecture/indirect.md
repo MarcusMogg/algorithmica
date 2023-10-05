@@ -1,21 +1,15 @@
----
-title: Indirect Branching
-weight: 4
----
 
-During assembly, all labels are converted to addresses (absolute or relative) and then encoded into jump instructions.
+在汇编期间，所有的标签会被转换为地址（直接或者间接），然后编码到跳转指令
 
-You can also jump by a non-constant value stored inside a register, which is called a *computed jump*:
+你也可以跳转到存储在寄存器中的非 常量地址， 称为 *计算跳转*
 
 ```nasm
 jmp rax
 ```
 
-This has a few interesting applications related to dynamic languages and implementing more complex control flow.
+## Multiway Branch
 
-### Multiway Branch
-
-If you have already forgotten what a `switch` statement does, here is a little subroutine for calculating GPA in the American grading system:
+如果你忘了`switch` 是干什么的，这里有一个小程序来计算美国毕业体系下的GPA
 
 ```cpp
 switch (grade) {
@@ -40,11 +34,12 @@ switch (grade) {
 }
 ```
 
-I personally don't remember the last time I used a switch in a non-educational context. In general, switch statements are equivalent to a sequence of "if, else if, else if, else if…" and so on, and for this reason many languages don't even have them. Nonetheless, such control flow structures are important for implementing parsers, interpreters, and other state machines, which are often comprised of a single `while (true)` loop and a `switch (state)` statement inside.
+通常来说，switch 相当于 一系列 "if, else if, else if, else if…" ,因此很多语言没有switch。尽管如此，这样的控制流结构在实现状态机时非常重要。通常就是一个 `while (true)` 循环 加一个 `switch (state)` 
 
-When we have control over the range of values that the variable can take, we can use the following trick utilizing computed jumps. Instead of making $n$ conditional branches, we can create a *branch table* that contains pointers/offsets to possible jump locations, and then just index it with the `state` variable taking values in the $[0, n)$ range.
+当我们可以控制变量的取值范围时，我们可以使用下面的技巧，利用计算跳转。我们可以创建一个包含所有可能跳转地址条件表 而不是使用n个条件分支，然后只需要使用 取值在 $[0, n)$ 的state 变量进行索引
+ 
+但数据密集时（不一定是严格排列，但必须值得在表中放一个空白字段），编译器可以使用这种技术。他也可以通过 计算 goto 显示实现：
 
-Compilers use this technique when the values are densely packed together (not necessarily strictly sequentially, but it has to be worth having blank fields in the table). It can also be implemented explicitly with a *computed goto*:
 
 ```cpp
 void weather_in_russia(int season) {
@@ -68,11 +63,11 @@ void weather_in_russia(int season) {
 
 Switch-based code is not always straightforward for compilers to optimize, so in the context of state machines, `goto` statements are often used directly. The I/O-related part of `glibc` is full of examples.
 
-### Dynamic Dispatch
+Switch-based 对编译器来说 不一定可以简单的优化，所以在 状态机上下文中，`goto` 也会直接使用，`glibc`的 I/O 相关部分是一个例子
+## Dynamic Dispatch 动态分发
 
-Indirect branching is also instrumental in implementing runtime polymorphism.
+间接分支 在运行时多态的实现中也很有用
 
-Consider the cliché example when we have an abstract class of `Animal` with a virtual `.speak()` method, and two concrete implementations: a `Dog` that barks and a `Cat` that meows:
 
 ```cpp
 struct Animal {
@@ -88,7 +83,7 @@ struct Cat {
 };
 ```
 
-We want to create an animal and, without knowing its type in advance, call its `.speak()` method, which should somehow invoke the right implementation:
+我们想要创建一个动物，并且在事先不知道其类型的情况下调用它的 `.speak()` 方法，该方法应该以某种方式调用正确的实现：
 
 ```c++
 Dog sparkles;
@@ -99,6 +94,8 @@ catdog->speak();
 ```
 
 There are many ways to implement this behavior, but C++ does it using a *virtual method table*.
+
+有许多方法来实现这种行为，C++ 使用 虚函数表
 
 For all concrete implementations of `Animal`, compiler pads all their methods (that is, their instruction sequences) so that they have the exact same length for all classes (by inserting some [filler instructions](../layout) after `ret`) and then just writes them sequentially somewhere in the instruction memory. Then it adds a *run-time type information* field to the structure (that is, to all its instances), which is essentially just the offset in the memory region that points to the right implementation of the virtual methods of the class.
 

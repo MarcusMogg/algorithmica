@@ -12,7 +12,7 @@
     - [2.2. 汇编语言](002-architecture/assembly.md)
     - [2.3. 循环和条件](002-architecture/loops.md)
     - [2.4. 函数和递归](002-architecture/functions.md)
-    - [2.5. Indirect Branching](002-architecture/indirect.md)
+    - [2.5. 间接分支](002-architecture/indirect.md)
     - [2.6. Machine Code Layout]()
     - [2.7. System Calls]()
     - [2.8. Virtualization]()
