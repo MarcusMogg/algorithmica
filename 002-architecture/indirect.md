@@ -93,19 +93,18 @@ Animal *catdog = (rand() & 1) ? &sparkles : &mittens;
 catdog->speak();
 ```
 
-There are many ways to implement this behavior, but C++ does it using a *virtual method table*.
+有许多方法来实现这种行为，C++ 使用 虚函数表 *virtual method table*
 
-有许多方法来实现这种行为，C++ 使用 虚函数表
 
-For all concrete implementations of `Animal`, compiler pads all their methods (that is, their instruction sequences) so that they have the exact same length for all classes (by inserting some [filler instructions](../layout) after `ret`) and then just writes them sequentially somewhere in the instruction memory. Then it adds a *run-time type information* field to the structure (that is, to all its instances), which is essentially just the offset in the memory region that points to the right implementation of the virtual methods of the class.
+对于 的所有具体实现，编译器会填充它们的所有 `Animal` 方法（即它们的指令序列），以便它们对所有类具有完全相同的长度（通过在后面 `ret` 插入一些填充指令），然后将它们按顺序写入指令存储器中的某个位置。 然后，它将运行时类型信息字段添加到结构（即，添加到其所有实例）中，该字段实质上只是内存区域中指向类虚拟方法的正确实现的偏移量。
 
-With a virtual method call, that offset field is fetched from the instance of a structure and a normal function call is made with it, using the fact that all methods and other fields of every derived class have exactly the same offsets.
+在虚函数调用中，先从 类实例中读取偏移自动，然后进行一个普通的函数调用（每个派生类的所有虚方法都具有完全相同的偏移量这一事实)。
 
-Of course, this adds some overhead:
+当然，这会造成额外开销：
 
-- You may need to spend another 15 cycles or so for the same pipeline flushing reasons as for [branch misprediction](/hpc/pipelining).
-- The compiler most likely won't be able to inline the function call itself.
-- Class size increases by a couple of bytes or so (this is implementation-specific).
-- The binary size itself increases a little bit.
+- 由于与分支错误预测 相同的管道 刷新原因，可能需要多花费 15 个周期左右
+- 编译器没法inline
+- 类大小多2个字节或者更多（取决于实现）
+- 二进制大小略微增加.
 
-For these reasons, runtime polymorphism is usually avoided in performance-critical applications.
+处于这些原因，在性能敏感应用中，运行时多态应该避免使用
