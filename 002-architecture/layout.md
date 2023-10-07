@@ -1,31 +1,23 @@
 
-Computer engineers like to mentally split the [pipeline of a CPU](/hpc/pipelining) into two parts: the *front-end*, where instructions are fetched from memory and decoded, and the *back-end*, where they are scheduled and finally executed. Typically, the performance is bottlenecked by the execution stage, and for this reason, most of our efforts in this book are going to be spent towards optimizing around the back-end.
+计算机工程师 精神上 喜欢把 CPU 流水线划分为两部分： 前端，从内存读取和解码指令；后端，指令调度和最终执行。典型的，性能瓶颈在于执行部分，出于这个原因，本书中的大部分工作 围绕后端优化
 
-But sometimes the reverse can happen when the front-end doesn't feed instructions to the back-end fast enough to saturate it. This can happen for many reasons, all ultimately having something to do with how the machine code is laid out in memory, and affect performance in anecdotal ways, such as removing unused code, swapping "if" branches, or even changing the order of function declarations causing performance to either improve or deteriorate.
+但是有时相反，前端填充指令的速度不过快，使得后端不饱和。这可能有多种原因，所有这些最终都需要 在某种程度上 改变机器码在内存的布局，比如 删除无用代码，交互if 分支，甚至是改变 函数声明顺序
 
-### CPU Front-End
+## CPU Front-End 前端
 
-Before the machine code gets transformed into instructions, and the CPU understands what the programmer wants, it first needs to go through two important stages that we are interested in: *fetch* and *decode*.
+在机器码转换成指令，CPU理解程序员想要做什么之前，有两个重要的阶段需要我们关注： *fetch* 和 *decode*.
 
-During the **fetch** stage, the CPU simply loads a fixed-size chunk of bytes from the main memory, which contains the binary encodings of some number of instructions. This block size is typically 32 bytes on x86, although it may vary on different machines. An important nuance is that this block has to be [aligned](/hpc/cpu-cache/cache-lines): the address of the chunk must be multiple of its size (32B, in our case).
+在 **fetch**阶段，CPU简单的从内存中加载固定大小的块，包含一些 二进制编码的指令和数字。在 x64上块大小典型是 32 byte，尽管这在不同机器上各不相同。一个重要的差别是 块必须对齐： 块地址必须是 大小的倍数。
 
-<!-- todo: what happens when an instruction crosses the boundary? -->
-
-Next comes the **decode** stage: the CPU looks at this chunk of bytes, discards everything that comes before the instruction pointer, and splits the rest of them into instructions. Machine instructions are encoded using a variable number of bytes: something simple and very common like `inc rax` takes one byte, while some obscure instruction with encoded constants and behavior-modifying prefixes may take up to 15. So, from a 32-byte block, a variable number of instructions may be decoded, but no more than a certain machine-dependent limit called the *decode width*. On my CPU (a [Zen 2](https://en.wikichip.org/wiki/amd/microarchitectures/zen_2)), the decode width is 4, which means that on each cycle, up to 4 instructions can be decoded and passed to the next stage.
+接下来是 **decode** 阶段：CPU查看二进制块，丢弃指令指针之前的内容，然后把剩余的部分 分割为 指令。机器指令编码 使用不同大小的byte：一些简单常见的指令 花费1byte，比如 `inc rax`,  而一些晦涩的指令 带上编码的常数和 前缀可以达到 15 。所以，从一个 32byte 大小的块可以 解码出不同数量的指令，但不超过一个固定的 机器相关的限制 叫做 解码宽度*decode width*。 在我的CPU（ [Zen 2](https://en.wikichip.org/wiki/amd/microarchitectures/zen_2)）上是4，这意味着 每个周期，最多只有4个指令可以被解码并发送到下一阶段。
 
 The stages work in a pipelined fashion: if the CPU can tell (or [predict](/hpc/pipelining/branching/)) which instruction block it needs next, then the fetch stage doesn't wait for the last instruction in the current block to be decoded and loads the next one right away.
 
-<!--
+这个阶段以流水线的形式工作： 如果CPU 可以 告诉（或着预测）下一个指令块需要什么，那么 fetch阶段可以 不用等待上一条指令完成 就去加载和 解码下一条。
 
-Decoded Stream Buffer (DSB)
+## Code Alignment 代码对齐
 
-Loop Stream Detector (LSD)
-
--->
-
-### Code Alignment
-
-Other things being equal, compilers typically prefer instructions with shorter machine code, because this way more instructions can fit in a single 32B fetch block, and also because it reduces the size of the binary. But sometimes the reverse is prefereable, due to the fact that the fetched instructions' blocks must be aligned.
+在其他条件相同的情况下，编译器通常会选择 机器码更短的指令，因为这样 一个 32B 的 fetch 块可以包含更多指令，而且可以减少二进制大小。但有时相反，因为 fetch的 指令块必须对齐。
 
 Imagine that you need to execute an instruction sequence that starts on the last byte of a 32B-aligned block. You may be able to execute the first instruction without additional delay, but for the subsequent ones, you have to wait for one additional cycle to do another instruction fetch. If the code block was aligned on a 32B boundary, then up to 4 instructions could be decoded and then executed concurrently (unless they are extra long or interdependent).
 
