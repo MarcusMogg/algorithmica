@@ -24,18 +24,19 @@
 GCC中，你可以使用 `-falign-labels=n`  指定特殊的对齐策略，如果你想有更精细的选择，可以 [替换](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html) `-labels` 为 `-function`, `-loops`, or `-jumps` 。 在 `-O2` 或者 `-O3`基本这是默认开启的，如果没设置特定对齐，通常会选择机器相关的默认值
 ## Instruction Cache 指令缓存
 
-The instructions are stored and fetched using largely the same [memory system](/hpc/cpu-cache) as for the data, except maybe the lower layers of cache are replaced with a separate *instruction cache* (because you wouldn't want a random data read to kick out the code that processes it).
 
-The instruction cache is crucial in situations when you either:
+指令的存储、读取  和 数据的内存系统有很多相同，除了低级别缓存被替换为一个独立的指令缓存（因为你不希望随机的数据读取 赶走 处理它的代码）
 
-- don't know what instructions you are going to execute next, and need to fetch the next block with [low latency](/hpc/cpu-cache/latency),
-- or are executing a long sequence of verbose-but-quick-to-process instructions, and need [high bandwidth](/hpc/cpu-cache/bandwidth).
+指令缓存在某些场景下至关重要：
 
-The memory system can therefore become the bottleneck for programs with large machine code. This consideration limits the applicability of the optimization techniques we've previously discussed:
+-  不知道你将执行的下一条指令，需要低延时加载
+-  需要执行一长串 复杂但是快速执行的指令，并且需要高带宽
 
-- [Inlining functions](../functions) is not always optimal, because it reduces code sharing and increases the binary size, requiring more instruction cache.
-- [Unrolling loops](../loops) is only beneficial up to some extent, even if the number of iterations is known during compile time: at some point, the CPU would have to fetch both instructions and data from the main memory, in which case it will likely be bottlenecked by the memory bandwidth.
-- Huge [code alignments](#code-alignment) increase the binary size, again requiring more instruction cache. Spending one more cycle on fetch is a minor penalty compared to missing the cache and waiting for the instructions to be fetched from the main memory.
+对于机器码很大的应用来说，内存可能成为瓶颈。这可能会影响我们之前讨论的优化技术的应用
+
+- Inline 不总是有效的, 因为它减少了代码共享并增大二进制体积，需要更多的指令缓存
+- 循环展开只在某些上下文有效，即便迭代数量在编译期已知：在某些时候，CPU需要从内存同时获取指令和数据，在这种情况下，内存带宽会成为瓶颈。
+- 大的代码对齐 会增加二进制体积，进而需要更大的指令缓存。缓存未命中和等待指令获取 会 额外1个周期的惩罚。
 
 Another aspect is that placing frequently used instruction sequences on the same [cache lines](/hpc/cpu-cache/cache-lines) and [memory pages](/hpc/cpu-cache/paging) improves [cache locality](/hpc/external-memory/locality). To improve instruction cache utilization, you should  group hot code with hot code and cold code with cold code, and remove dead (unused) code if possible. If you want to explore this idea further, check out Facebook's [Binary Optimization and Layout Tool](https://engineering.fb.com/2018/06/19/data-infrastructure/accelerate-large-scale-applications-with-bolt/), which was recently [merged](https://github.com/llvm/llvm-project/commit/4c106cfdf7cf7eec861ad3983a3dd9a9e8f3a8ae) into LLVM.
 
