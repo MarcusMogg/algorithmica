@@ -17,14 +17,16 @@
     - [2.7. System Calls]()
     - [2.8. Virtualization]()
 
-3. Instruction-Level Parallelism
- 3.1. Pipeline Hazards
- 3.2. The Cost of Branching
- 3.3. Branchless Programming
- 3.4. Instruction Tables
- 3.5. Instruction Scheduling
- 3.6. Throughput Computing
- 3.7. Theoretical Performance Limits
+- [3. 指令级并行](003-pipelining/)
+
+    - [3.1. Pipeline Hazards]()
+    - [3.2. The Cost of Branching]()
+    - [3.3. Branchless Programming]()
+    - [3.4. Instruction Tables]()
+    - [3.5. Instruction Scheduling]()
+    - [3.6. Throughput Computing]()
+    - [3.7. Theoretical Performance Limits]()
+
 4. Compilation
  4.1. Stages of Compilation
  4.2. Flags and Targets

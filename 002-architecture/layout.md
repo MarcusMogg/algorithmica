@@ -38,11 +38,11 @@ GCC中，你可以使用 `-falign-labels=n`  指定特殊的对齐策略，如�
 - 循环展开只在某些上下文有效，即便迭代数量在编译期已知：在某些时候，CPU需要从内存同时获取指令和数据，在这种情况下，内存带宽会成为瓶颈。
 - 大的代码对齐 会增加二进制体积，进而需要更大的指令缓存。缓存未命中和等待指令获取 会 额外1个周期的惩罚。
 
-Another aspect is that placing frequently used instruction sequences on the same [cache lines](/hpc/cpu-cache/cache-lines) and [memory pages](/hpc/cpu-cache/paging) improves [cache locality](/hpc/external-memory/locality). To improve instruction cache utilization, you should  group hot code with hot code and cold code with cold code, and remove dead (unused) code if possible. If you want to explore this idea further, check out Facebook's [Binary Optimization and Layout Tool](https://engineering.fb.com/2018/06/19/data-infrastructure/accelerate-large-scale-applications-with-bolt/), which was recently [merged](https://github.com/llvm/llvm-project/commit/4c106cfdf7cf7eec861ad3983a3dd9a9e8f3a8ae) into LLVM.
+另一方面，把频繁使用的指令串 放在相同的缓存行和 内存页 可以改善 缓存局部性。为了提升缓存利用率，你应该把 热代码和热代码 放在一起，冷代码和冷代码放在一起，删除无用代码。如果你想探索更多，可以查看 Facebook 的[Binary Optimization and Layout Tool](https://engineering.fb.com/2018/06/19/data-infrastructure/accelerate-large-scale-applications-with-bolt/)
 
-### Unequal Branches
+## Unequal Branches 不相等分支
 
-Suppose that for some reason you need a helper function that calculates the length of an integer interval. It takes two arguments, $x$ and $y$, but for convenience, it may correspond to either $[x, y]$ or $[y, x]$, depending on which one is non-empty. In plain C, you would probably write something like this:
+计算整数区间长度：
 
 ```c++
 int length(int x, int y) {
@@ -53,7 +53,7 @@ int length(int x, int y) {
 }
 ```
 
-In x86 assembly, there is a lot more variability to how you can implement it, noticeably impacting performance. Let's start with trying to map this code directly into assembly:
+在x86汇编中，实现方式有许多变量，可能会影响性能。让我们首先直接把代码转换为汇编
 
 ```nasm
 length:
@@ -71,9 +71,10 @@ less:
     jmp  done
 ```
 
-While the initial C code seems very symmetrical, the assembly version isn't. This results in an interesting quirk that one branch can be executed slightly faster than the other: if `x > y`, then the CPU can just execute the 5 instructions between `cmp` and `ret`, which, if the function is aligned, are all going to be fetched in one go; while in case of `x <= y`, two more jumps are required.
 
-It may be reasonable to assume that the `x > y` case is *unlikely* (why would anyone calculate the length of an inverted interval?), more like an exception that mostly never happens. We can detect this case, and simply swap `x` and `y`:
+开始的c代码可能十分对称，但是汇编视角不是。这倒是的结果是一个分支的执行比另一个分支要快的多： 如果 `x > y` CPU只需要执行`cmp` 和 `ret`之间的5条指令，如果函数是对齐的，可以在一次 fetch完成；但在`x <= y`  时 需要两个额外跳转，
+
+有理由认为 `x > y` 是 *unlikely*，更像是几乎不会发生的异常。这个例子里我们可以简单的交换 xy
 
 ```c++
 int length(int x, int y) {
@@ -83,7 +84,7 @@ int length(int x, int y) {
 }
 ```
 
-The assembly would go like this, as it typically does for the if-without-else patterns:
+汇编代码可能是这样：
 
 ```nasm
 length:
@@ -96,7 +97,7 @@ normal:
     ret
 ```
 
-The total instruction length is 6 now, down from 8. But it is still not quite optimized for our assumed case: if we think that `x > y` never happens, then we are wasteful when loading the `xchg edi, esi` instruction that is never going to be executed. We can solve this by moving it outside the normal execution path:
+总指令数现在为6 最多为8。但这对我们的汇编来说 不是个明显的优化：如果我们任务`x > y` 从不发生，那 加载 `xchg edi, esi` 指令对我们来说就是浪费，因为它几乎不执行。我们可以通过把它移除正常执行路径来解决这个问题
 
 ```nasm
 length:
@@ -111,7 +112,7 @@ swap:
     jmp normal
 ```
 
-This technique is quite handy when handling exceptions cases in general, and in high-level code, you can give the compiler a [hint](/hpc/compilation/situational) that a certain branch is more likely than the other:
+这个技巧对处理异常情况 十分便利，在高级别代码中，你可以给编译器提示，告诉它 某个分支是 更可能发生的
 
 ```c++
 int length(int x, int y) {
@@ -123,24 +124,7 @@ int length(int x, int y) {
 
 This optimization is only beneficial when you know that a branch is very rarely taken. When this is not the case, there are [other aspects](/hpc/pipelining/hazards) more important than the code layout, that compel compilers to avoid any branching at all — in this case by replacing it with a special "conditional move" instruction, roughly corresponding to the ternary expression `(x > y ? y - x : x - y)` or calling `abs(x - y)`:
 
-```nasm
-length:
-    mov   edx, edi
-    mov   eax, esi
-    sub   edx, esi
-    sub   eax, edi
-    cmp   edi, esi
-    cmovg eax, edx  ; "mov if edi > esi"
-    ret
-```
-
-Eliminating branches is an important topic, and we will spend [much of the next chapter](/hpc/pipelining/branching) discussing it in more detail.
-
-<!--
-
-This architecture peculiarity
-
-When you have branches in your code, there is a variability in how you can place their instruction sequences in the memory — and surprisingly, .
+这个优化只有你知道哪个分支几乎不可能发生时有用。如果不是这种情况，会有其他问题严重影响代码布局，迫使编译器尽量避免任何分支——在这种情况下，将其替换为特殊的“条件移动”指令，大致对应于三元表达式`(x > y ? y - x : x - y)` 或者 `abs(x - y)`:
 
 ```nasm
 length:
@@ -153,16 +137,5 @@ length:
     ret
 ```
 
-Granted that `x > y` never or almost never happens, the branchy variant will be 2 instructions shorter.
 
-https://godbolt.org/z/bb3a3ahdE
-
-(The compiler can't optimize it because it's technically [not allowed to](/hpc/compilation/contracts): despite `y - x` being valid, `x - y` could over/underflow, causing undefined behavior. Although fully correct, I guess the compiler just doesn't date executing it.)
-
-We will spend [much of the next chapter](/hpc/pipelining/branching) discussing it in more detail.
-
-You don't have to decode the things you are not going to execute anyway.
-
-In general, you want to, and put rarely executed code away — even in the case of if-without-else patterns.
-
--->
+分支消除 是一个重要的话题，我们将在下一章的大部分内容中讨论细节

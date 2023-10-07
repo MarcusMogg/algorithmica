@@ -148,6 +148,22 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "003-pipelining/README.md",
+    "003-pipelining/img/probabilities.svg",
+    "003-pipelining/img/superscalar.png",
+    "003-pipelining/img/branchy-vs-branchless.svg",
+    "003-pipelining/img/bubble.png",
+    "003-pipelining/img/pipeline.png",
+    "003-pipelining/_index.md",
+    "003-pipelining/throughput.md",
+    "003-pipelining/tables.md",
+    "003-pipelining/scheduling.md",
+    "003-pipelining/limits.md",
+    "003-pipelining/hazards.md",
+    "003-pipelining/branchless.md",
+    "003-pipelining/branching.md",
+    "003-pipelining/img",
+    "003-pipelining",
     "002-architecture/indirect.md",
     "_sidebar.md",
     "002-architecture/functions.md",
@@ -173,9 +189,7 @@
     "hpc",
     "hpc/cpu-cache/latency.md",
     "hpc/cpu-cache",
-    "001-complexity/img/dennard.png",
     "001-complexity/README.md",
-    "001-complexity.md",
-    "README.md"
+    "001-complexity.md"
   ]
 }
