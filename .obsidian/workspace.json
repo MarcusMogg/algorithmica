@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "002-architecture/layout.md",
+                "file": "003-pipelining/README.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "002-architecture/layout.md",
+                "file": "003-pipelining/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "002-architecture/layout.md",
+                "file": "003-pipelining/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "002-architecture/layout.md"
+                "file": "003-pipelining/README.md"
               }
             }
           }
@@ -148,6 +148,7 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "002-architecture/layout.md",
     "003-pipelining/README.md",
     "003-pipelining/img/probabilities.svg",
     "003-pipelining/img/superscalar.png",
@@ -169,7 +170,6 @@
     "002-architecture/functions.md",
     "002-architecture/interaction.md",
     "002-architecture/assembly.md",
-    "002-architecture/layout.md",
     "002-architecture/isa.md",
     "data-structures/img/binary-heat.png",
     "002-architecture/loops.md",
