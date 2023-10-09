@@ -1,23 +1,18 @@
----
-title: The Cost of Branching
-weight: 2
-published: true
----
 
-When a CPU encounters a conditional jump or [any other type of branching](/hpc/architecture/indirect), it doesn't just sit idle until its condition is computed — instead, it starts *speculatively executing* the branch that seems more likely to be taken immediately. During execution, the CPU computes statistics about branches taken on each instruction, and after some time, they start to predict them by recognizing common patterns.
+当CPU 遇到一个条件跳转或者其它类型的分支，它不会等在原地直到条件计算完成—— 相反，它立刻开始预测性地执行 看起来更有可能发生的分支。在执行期间，CPU会统计每条指令执行的分支，在一段时间之后，它会开始识别通用模式来 预测分支。
 
-For this reason, the true "cost" of a branch largely depends on how well it can be predicted by the CPU. If it is a pure 50/50 coin toss, you have to suffer a [control hazard](../hazards) and discard the entire pipeline, taking another 15-20 cycles to build up again. And if the branch is always or never taken, you pay almost nothing except checking the condition.
+出于这个原因，分支的真实费用 取决于 它可以被CPU 多好的预测。如果是纯纯的 50/50 投硬币，那么你不得不承受  [control hazard](../hazards) ，即丢弃 整个流水线，然后重新花费15-20个周期重建。如果分支从不执行，那么除了条件检查 没有别的额外开销。
 
-## An Experiment
+## 一个实验
 
-As a case study, we are going to create an array of random integers between 0 and 99 inclusive:
+一个学习案例，我们创建一个包含 0-99 随机整数的数组：
 
 ```c++
 for (int i = 0; i < N; i++)
     a[i] = rand() % 100;
 ```
 
-Then we create a loop where we sum up all its elements under 50:
+然后我们创建一个循环来计算小于50的元素的和：
 
 ```c++
 volatile int s;
@@ -27,9 +22,10 @@ for (int i = 0; i < N; i++)
         s += a[i];
 ```
 
-We set $N = 10^6$ and run this loop many times over so that the [cold cache](/hpc/cpu-cache/bandwidth) effect doesn't mess up our results. We mark our accumulator variable as `volatile` so that the compiler doesn't vectorize the loop, interleave its iterations, or "cheat" in any other way.
 
-On Clang, this produces assembly that looks like this:
+我们设置 $N = 10^6$ 并多次执行，这样冷缓存不会搞乱 结果。我们标记求和结果变量为`volatile` ，这样编译器不会向量化循环、interleave its iterations 或者其他方式"欺骗"
+
+Clang 中, 产生的汇编看起来像：
 
 ```nasm
     mov  rcx, -4000000
@@ -45,17 +41,17 @@ body:
     jmp  counter
 ```
 
-Our goal is to simulate a completely unpredictable branch, and we successfully achieve it: the code takes ~14 CPU cycles per element. For a very rough estimate of what it is supposed to be, we can assume that the branches alternate between `<` and `>=`, and the pipeline is mispredicted every other iteration. Then, every two iterations:
+我们的目标是模拟完全不可预测的分支，并且我们成功达到这个目标： 代码每个循环花费 大概14个CPU周期。做一个非常粗略的估计，我们可以假设分支在 `<`  `>=` 之间交替，流水线错误预测每一个分支。然后，每两次循环：
 
-- We discard the pipeline, which is 19 cycles deep on Zen 2 (i.e., it has 19 stages, each taking one cycle).
-- We need a memory fetch and a comparison, which costs ~5 cycles. We can check the conditions of even and odd iterations concurrently, so let's assume we only pay it once per 2 iterations.
-- In the case of the `<` branch, we need another ~4 cycles to add `a[i]` to a volatile (memory-stored) variable `s`.
+- 丢弃整个流水线，这在Zen 2上大概19个周期（i.e.,它有19个阶段，每个1个周期）
+- 我们需要一个内存获取和一个比较，这需要~5个周期。我们可以同时检查偶数和奇数迭代的条件，因此假设我们每 2 次迭代只支付一次。
+- 在 `<` 分支的情况下，我们需要另外 ~4 个周期来添加 `a[i]` 到（内存存储）volatile 变量 `s` 中。
 
-Therefore, on average, we need to spend $(4 + 5 + 19) / 2 = 14$ cycles per element, matching what we measured.
+因此，平均而言，我们需要为每个元素花费 (4+5+19)/2=14 周期，以匹配我们测量的内容。
 
-### Branch Prediction
+## 分支预测
 
-We can replace the hardcoded `50` with a tweakable parameter `P` that effectively sets the probability of the `<` branch:
+我们可以替换 硬编码的50 为一个 可调整的参数 `P`，这样可以快速调整`<` 分支的概率：
 
 ```c++
 for (int i = 0; i < N; i++)
@@ -63,21 +59,22 @@ for (int i = 0; i < N; i++)
         s += a[i];
 ```
 
-Now, if we benchmark it for different values of `P`, we get an interesting-looking graph:
+现在对不同的 `P` 进行基准测试, 我们得到了一张看起来有趣的图:
 
 ![](../img/probabilities.svg)
 
-Its peak is at 50-55%, as expected: branch misprediction is the most expensive thing here. This graph is asymmetrical: it takes just ~1 cycle to only check conditions that are never satisfied (`P = 0`), and ~7 cycles for the sum if the branch is always taken (`P = 100`).
 
-This graph is not unimodal: there is another local minimum at around 85-90%. We spend ~6.15 cycles per element there or about 10-15% faster than when we always take the branch, accounting for the fact that we need to perform fewer additions. Branch misprediction stops affecting the performance at this point because when it happens, not the whole instruction buffer is discarded, but only the operations that were speculatively scheduled. Essentially, that 10-15% mispredict rate is the equilibrium point where we can see far enough in the pipeline not to stall but still save 10-15% on taking the cheaper `>=` branch.
+峰值在 50-55%，和预期的一样：分支预测失败是这里面最昂贵的。这图是不对称的：在`P = 0` 时，只花费~1 个循环来检查条件从不满足；在 `P = 100` 时，大概 ~7个周期来求和。
 
-Note that it costs almost nothing to check for a condition that never or almost never occurs. This is why programmers use runtime exceptions and base case checks so profusely: if they are indeed rare, they don't really cost anything.
+这图不是 单峰的：在85-90 有一个局部最小值。在那里为每个元素花费 ~6.15 个周期，比我们总是使用分支时 快10-15%，因为执行更少的求和。这时，分支预测错误 导致的停止 仍会影响性能，当它发生时，不会丢弃整个指令缓冲区，只会丢弃预测调度的操作。本质上，10-15% 的错误预测 是一个平衡点，
 
-### Pattern Detection
+请注意，检查从未发生或几乎从未发生过的情况几乎不需要任何费用。这就是为什么程序员如此大量使用运行时异常和基本情况检查的原因：如果它们确实很少见，它们实际上不会花费任何成本。
 
-In our example, everything that was needed for efficient branch prediction is a hardware statistics counter. If we historically took branch A more often than branch B, then it makes sense to speculatively execute branch A. But branch predictors on modern CPUs are considerably more advanced than that and can detect much more complicated patterns.
+## Pattern Detection 模式检测
 
-Let's fix `P` back at 50, and then sort the array first before the main summation loop:
+在我们的例子里，高效分支预测所需的是硬件统计计数器。 如果我们历史上执行分支A多过B，那么预测执行分支A是有意义的。但是 现代CPU的分支预测器比这高级的多，而且可以检测更多的模式。
+
+让我们把 `P` 调回50，然后在 求和之前对 数组进行排序：
 
 ```c++
 for (int i = 0; i < N; i++)
@@ -86,13 +83,15 @@ for (int i = 0; i < N; i++)
 std::sort(a, a + n);
 ```
 
-We are still processing the same elements, but in a different order, and instead of 14 cycles, it now runs in a little bit more than 4, which is exactly the average of the cost of the pure `<` and `>=` branches.
 
-The branch predictor can pick up on much more complicated patterns than just "always left, then always right" or "left-right-left-right." If we just decrease the size of the array $N$ to 1000 (without sorting it), then the branch predictor memorizes the entire sequence of comparisons, and the benchmark again measures at around 4 cycles — in fact, even slightly fewer than in the sorted array case, because in the former case branch predictor needs to spend some time flicking between the "always yes" and "always no" states.
+我们任然处理相同的元素，但是不同的顺序。但现在不是14个周期，而是略多于 4 个周期。这正好是`<` 和 `>=` 分支的平均值。
 
-### Hinting Likeliness of Branches
+分支预测器可以发现比“总是左，然后总是右”或“左-右-左-右”更复杂的模式。如果我们只是将数组的大小减小到 1000（不对其进行排序），那么分支预测器会记住整个比较序列，并且再次基准测试大约 4 个周期 —— 事实上，甚至比排序数组的情况略少。因为在前一种情况下，分支预测器需要花一些时间在“始终是”和“始终否”状态之间切换。
 
-If you know beforehand which branch is more likely, it may be beneficial to [pass that information](/hpc/compilation/situational) to the compiler:
+## Hinting Likeliness of Branches 提示分支的可能性
+
+
+如果你提前知道哪个分支可能性更高，那么把信息传递给编译器可能会有用：
 
 ```c++
 for (int i = 0; i < N; i++)
@@ -100,12 +99,16 @@ for (int i = 0; i < N; i++)
         s += a[i];
 ```
 
-When `P = 75`, it measures around ~7.3 cycles per element, while the original version without the hint needs ~8.3.
 
-This hint does not eliminate the branch or communicate anything to the branch predictor, but it changes the [machine code layout](/hpc/architecture/layout) in a way that lets the CPU front-end process the more likely branch slightly faster (although usually by no more than one cycle).
+当`P = 75`，测量结果是每个元素 ~7.3周期，而之前没有提示的版本是~8.3周期.
+
+这个提示不会消除分支，或者向分支预测器传递任何信息，仅改变机器码布局，使得CPU 前端处理 likely 分支更快（尽管通常不超过1个周期）
 
 This optimization is only beneficial when you know which branch is more likely to be taken before the compilation stage. When the branch is fundamentally unpredictable, we can try to remove it completely using *predication* — a profoundly important technique that we are going to explore in [the next section](../branchless).
 
-### Acknowledgements
+仅当您在编译之前知道更有可能采用哪个分支时，此优化才有用。当分支从根本上不可预测时，我们可以尝试使用谓词将分支完全删除 - 我们将在下一节中探讨。
 
-This case study is inspired by [the most upvoted Stack Overflow question ever](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array).
+## Acknowledgements致谢
+
+
+这个案例研究的灵感来自 [stack overflow]((https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array) 有史以来点赞最多的问题。

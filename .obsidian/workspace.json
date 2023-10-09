@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "003-pipelining/README.md",
+                "file": "003-pipelining/hazards.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "003-pipelining/README.md",
+                "file": "003-pipelining/hazards.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "003-pipelining/README.md",
+                "file": "003-pipelining/hazards.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "003-pipelining/README.md"
+                "file": "003-pipelining/hazards.md"
               }
             }
           }
@@ -148,8 +148,10 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
-    "002-architecture/layout.md",
+    "003-pipelining/branching.md",
+    "003-pipelining/hazards.md",
     "003-pipelining/README.md",
+    "002-architecture/layout.md",
     "003-pipelining/img/probabilities.svg",
     "003-pipelining/img/superscalar.png",
     "003-pipelining/img/branchy-vs-branchless.svg",
@@ -160,9 +162,7 @@
     "003-pipelining/tables.md",
     "003-pipelining/scheduling.md",
     "003-pipelining/limits.md",
-    "003-pipelining/hazards.md",
     "003-pipelining/branchless.md",
-    "003-pipelining/branching.md",
     "003-pipelining/img",
     "003-pipelining",
     "002-architecture/indirect.md",
