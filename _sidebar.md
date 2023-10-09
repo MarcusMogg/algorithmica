@@ -19,13 +19,13 @@
 
 - [3. 指令级并行](003-pipelining/)
 
-    - [3.1. Pipeline Hazards]()
-    - [3.2. The Cost of Branching]()
-    - [3.3. Branchless Programming]()
-    - [3.4. Instruction Tables]()
-    - [3.5. Instruction Scheduling]()
-    - [3.6. Throughput Computing]()
-    - [3.7. Theoretical Performance Limits]()
+    - [3.1. Pipeline Hazards](003-pipelining/hazards.md)
+    - [3.2. 分支的成本](003-pipelining/branching.md)
+    - [3.3. Branchless Programming](003-pipelining/branchless.md)
+    - [3.4. Instruction Tables](003-pipelining/tables.md)
+    - [3.5. Instruction Scheduling](003-pipelining/scheduling.md)
+    - [3.6. Throughput Computing](003-pipelining/throughput.md)
+    - [3.7. Theoretical Performance Limits](003-pipelining/limits.md)
 
 4. Compilation
  4.1. Stages of Compilation
