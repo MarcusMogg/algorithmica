@@ -104,8 +104,6 @@ for (int i = 0; i < N; i++)
 
 这个提示不会消除分支，或者向分支预测器传递任何信息，仅改变机器码布局，使得CPU 前端处理 likely 分支更快（尽管通常不超过1个周期）
 
-This optimization is only beneficial when you know which branch is more likely to be taken before the compilation stage. When the branch is fundamentally unpredictable, we can try to remove it completely using *predication* — a profoundly important technique that we are going to explore in [the next section](../branchless).
-
 仅当您在编译之前知道更有可能采用哪个分支时，此优化才有用。当分支从根本上不可预测时，我们可以尝试使用谓词将分支完全删除 - 我们将在下一节中探讨。
 
 ## Acknowledgements致谢
