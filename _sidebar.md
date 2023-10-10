@@ -22,7 +22,7 @@
     - [3.1. Pipeline Hazards](003-pipelining/hazards.md)
     - [3.2. 分支的成本](003-pipelining/branching.md)
     - [3.3. 无分支编程](003-pipelining/branchless.md)
-    - [3.4. Instruction Tables](003-pipelining/tables.md)
+    - [3.4. 指令表](003-pipelining/tables.md)
     - [3.5. Instruction Scheduling](003-pipelining/scheduling.md)
     - [3.6. Throughput Computing](003-pipelining/throughput.md)
     - [3.7. Theoretical Performance Limits](003-pipelining/limits.md)

@@ -1,14 +1,8 @@
----
-title: Branchless Programming
-weight: 3
-published: true
----
 
-As we established in [the previous section](../branching), branches that can't be effectively predicted by the CPU are expensive as they may cause a long pipeline stall to fetch new instructions after a branch mispredict. In this section, we discuss the means of removing branches in the first place.
+和上衣章节提到的意义，分支无法预测对CPU是昂贵的，因为分支预测失败之后 会造成流水线停止来获取少量的指令。 在本章节，我们首先讨论删除分支的方法。
+## Predication 谓词
 
-### Predication
-
-We are going to continue the same case study we've started before — we create an array of random numbers and sum up all its elements below 50:
+继续我们之前开始的例子—— 我们创建了一个随机数字的数组 让后计算小于50的元素的和：
 
 ```c++
 for (int i = 0; i < N; i++)
@@ -21,18 +15,19 @@ for (int i = 0; i < N; i++)
         s += a[i];
 ```
 
-Our goal is to eliminate the branch caused by the `if` statement. We can try to get rid of it like this:
+
+我们的目标是消除 `if` 造成的分支。可以像这样：
 
 ```c++
 for (int i = 0; i < N; i++)
     s += (a[i] < 50) * a[i];
 ```
 
-The loop now takes ~7 cycles per element instead of the original ~14. Also, the performance remains constant if we change `50` to some other threshold, so it doesn't depend on the branch probability.
+现在这个循环花费 ~7个循环而不是原来的~14。而且，即便我们将 50 替换为其他值，性能也保持稳定，所以它现在是分支概率无关的。
 
-But wait… shouldn't there still be a branch? How does `(a[i] < 50)` map to assembly?
+但是等等...不应该还有分支吗？ `(a[i] < 50)` 如何映射到汇编？
 
-There are no Boolean types in assembly, nor any instructions that yield either one or zero based on the result of the comparison, but we can compute it indirectly like this: `(a[i] - 50) >> 31`. This trick relies on the [binary representation of integers](/hpc/arithmetic/integer), specifically on the fact that if the expression `a[i] - 50` is negative (implying `a[i] < 50`), then the highest bit of the result will be set to one, which we can then extract using a right-shift.
+汇编中没有 Boolean 类型，也没有根据比较结果产生 0/1 的指令，但是我们像这样间接计算：`(a[i] - 50) >> 31`. 这个trick 依赖整数的二进制表示，如果  `a[i] - 50` 是负数（即`a[i] < 50`），那么最高bit位就变为1，我们可以使用 右移提取出来。
 
 ```nasm
 mov  ebx, eax   ; t = x
@@ -41,7 +36,7 @@ sar  ebx, 31    ; t >>= 31
 imul  eax, ebx   ; x *= t
 ```
 
-Another, more complicated way to implement this whole sequence is to convert this sign bit into a mask and then use bitwise `and` instead of multiplication: `((a[i] - 50) >> 31 - 1) & a[i]`. This makes the whole sequence one cycle faster, considering that, unlike other instructions, `imul` takes 3 cycles:
+另外，有更复杂的办法来实现： 将符号bit位转换为mask，然后使用二进制运算 `and` 而不是乘法`((a[i] - 50) >> 31 - 1) & a[i]`。 这可以使整个序列快1个循环，因为不像其他指令`imul` 使用3个循环：
 
 ```nasm
 mov  ebx, eax   ; t = x
@@ -52,9 +47,9 @@ sub  ebx, 1     ; t -= 1 (causing underflow if t = 0)
 and  eax, ebx   ; x &= t
 ```
 
-Note that this optimization is not technically correct from the compiler's perspective: for the 50 lowest representable integers — those in the $[-2^{31}, - 2^{31} + 49]$ range — the result will be wrong due to underflow. We know that all numbers are all between 0 and 100, and this won't happen, but the compiler doesn't.
+注意这个优化在编译器视角，在技术上是不正确的：对于最小的 50个整数 ——  $[-2^{31}, - 2^{31} + 49]$ 范围内 —— 因为溢出，结果是不正确的。我们知道 所有的数字在 0～100 ，但是编译器不知道。
 
-But the compiler actually elects to do something different. Instead of going with this arithmetic trick, it used a special `cmov` ("conditional move") instruction that assigns a value based on a condition (which is computed and checked using the flags register, the same way as for jumps):
+但是 编译器确实做了不一样的事。 不是使用算术技巧，而是使用一个特殊的指令 `cmov`, 根据计算结果进行赋值：
 
 ```nasm
 mov     ebx, 0      ; cmov doesn't support immediate values, so we need a zero register
@@ -62,14 +57,14 @@ cmp     eax, 50
 cmovge  eax, ebx    ; eax = (eax >= 50 ? eax : ebx=0)
 ```
 
-So the code above is actually closer to using a ternary operator like this:
+所以代码实际上接近于使用三目运算符：
 
 ```c++
 for (int i = 0; i < N; i++)
     s += (a[i] < 50 ? a[i] : 0);
 ```
 
-Both variants are optimized by the compiler and produce the following assembly:
+两种变体都可以由编译器优化并产生下面的代码:
 
 ```nasm
     mov     eax, 0
@@ -83,110 +78,43 @@ loop:
     jnz     loop                                ; "iterate while rdx is not zero"
 ```
 
-This general technique is called *predication*, and it is roughly equivalent to this algebraic trick:
+
+这种通用技术被称为 谓词 *predication*, 大致等于这种代数技巧：
 
 $$
 x = c \cdot a + (1 - c) \cdot b
 $$
 
-This way you can eliminate branching, but this comes at the cost of evaluating *both* branches and the `cmov` itself. Because evaluating the ">=" branch costs nothing, the performance is exactly equal to [the "always yes" case](../branching/#branch-prediction) in the branchy version.
+这种方式可以消除分支，但是代价是 计算两个分支 和 `cmov`。 由于执行">=" 分支的成本不高，因此性能和 分支版本中的 “始终是“ 情况 相同
 
-### When Predication Is Beneficial
+## When Predication Is Beneficial 谓词什么时候是有用的
 
-Using predication eliminates [a control hazard](../hazards) but introduces a data hazard. There is still a pipeline stall, but it is a cheaper one: you only need to wait for `cmov` to be resolved and not flush the entire pipeline in case of a mispredict.
+使用谓词 消除了control hazard 但是带来了 data hazard。这里任然有 流水线停止，但是是 廉价的一个： 你只需要等待 `cmov`执行 而不是在预测错误时刷新整个流水线。
 
-However, there are many situations when it is more efficient to leave branchy code as it is. This is the case when the cost of computing *both* branches instead of just *one* outweighs the penalty for the potential branch mispredictions.
+但是，有很多情况下保留分支代码更有效。比如 计算两个分支的代价 超过 分支预测失败的惩罚。
 
-In our example, the branchy code wins when the branch can be predicted with a probability of more than ~75%.
+在我们的例子中，当分支 预测概率 超过 ～75%时，分支代码胜出。
 
 ![](../img/branchy-vs-branchless.svg)
 
-This 75% threshold is commonly used by the compilers as a heuristic for determining whether to use the `cmov` or not. Unfortunately, this probability is usually unknown at the compile time, so it needs to be provided in one of several ways:
 
-- We can use [profile-guided optimization](/hpc/compilation/situational/#profile-guided-optimization) which will decide for itself whether to use predication or not.
-- We can use [likeliness attributes](../branching#hinting-likeliness-of-branches) and [compiler-specific intrinsics](/hpc/compilation/situational) to hint at the likeliness of branches: `__builtin_expect_with_probability` in GCC and `__builtin_unpredictable` in Clang.
-- We can rewrite branchy code using the ternary operator or various arithmetic tricks, which acts as sort of an implicit contract between programmers and compilers: if the programmer wrote the code this way, then it was probably meant to be branchless.
+编译器通常将此 75% 阈值用作确定是否使用 `cmov` 的启发式方法。不幸的是，在编译时，这个概率通常不知道，因此需要通过以下几种方式之一提供它：
 
-The "right way" is to use branching hints, but unfortunately, the support for them is lacking. Right now [these hints seem to be lost](https://bugs.llvm.org/show_bug.cgi?id=40027) by the time the compiler back-end decides whether a `cmov` is more beneficial. There is [some progress](https://discourse.llvm.org/t/rfc-cmov-vs-branch-optimization/6040) towards making it possible, but currently, there is no good way of forcing the compiler to generate branch-free code, so sometimes the best hope is to just write a small snippet in assembly.
+- 可以使用 profile-guided optimization，让其自身决定是否使用谓词。
+- 可以使用 likely、unlikely 属性，以及编译器内建函数（`__builtin_expect_with_probability` in GCC ， `__builtin_unpredictable` in Clang）来标记分支可能性。
+- 我们可以使用 三目运算符和各种算数技巧 来重写分支代码，这充当程序员和编译器之间的隐式契约：如果程序员以这种方式编写代码，那么它可能意味着无分支。
 
-<!--
+”正确的方式“ 应该是使用 分支提示，但是不幸的是，编译器支持不好。现在，当编译器后端决定是否使用 `cmov`时 这些提示似乎已经丢失了，[issue](https://bugs.llvm.org/show_bug.cgi?id=40027), 有一些[进展](https://discourse.llvm.org/t/rfc-cmov-vs-branch-optimization/6040)， 但是目前为止，没有强制编译器生成无分支代码的好方法。
 
-Because this is very architecture-specific.
+## Larger Examples 更大的例子
 
-in the absence of branch likeliness hints
+**Strings.**  一个非常简化的模型，`std::string` 可以认为是 一个 null 结束、堆上分配的`char` 数组 和一个整数表示 string大小。
 
-While any program that uses a ternary operator is equivalent to a program that uses an `if` statement
+string的一个常见值 是 空字符串——这也是默认值。你任然需要处理它，一个比较自然的方式是：一个空指针加字符串大小赋值为0，然后在每个涉及处理string的地方先判断 指针是否为空或者长度是否为0。
 
-The codes seem equivalent. My guess is that the compiler doesn't know that `s + a[i]` does not cause integer overflow.
+但是，这样需要一个单独的分支，代价较大（除非大多数字符串为空或非空）。为了移除检查，从而删除分支，我们可以分配 ”0字符串“，它只是在某处分配的零字节，然后简单地将所有空字符串指向那里。现在所有带有空字符串的字符串操作都必须读取这个无用的零字节，但这仍然比分支错误预测便宜得多。
 
-(The compiler can't optimize it because it's technically [not allowed to](/hpc/compilation/contracts): despite `y - x` being valid, `x - y` could over/underflow, causing undefined behavior. Although fully correct, I guess the compiler just doesn't date executing it.)
-
-Branchless computing tricks like this one are especially important in all sorts of parallel algorithms.
-
-The `cmov` variant doesn't care about probabilities of branches. It only wins if the branch probability if 75% chance, which usually is the heuristic threshold set in compilers.
-
-This is a legal optimization, but I guess an implicit contract has evolved between application programmers and compiler engineers that if you write a ternary operator, then you kind of telling that it is likely going to be an unpredictable branch.
-
-The general technique is called *branchless* or *branch-free* programming. Predication is the main tool of it, but there are more complicated ways.
-
--->
-
-<!--
-
-Let's do a few more examples as an exercise.
-
-```c++
-int max(int a, int b) {
-    return (a > b) * a + (a <= b) * b;
-}
-```
-
-```c++
-int max(int a, int b) {
-    return (a > b ? a : b);
-}
-```
-
-
-```c++
-int abs(int a, int b) {
-    return max(diff, -diff);
-}
-```
-
-```c++
-int abs(int a, int b) {
-    int diff = a - b;
-    return (diff < 0 ? -diff : diff);
-}
-```
-
-```c++
-int abs(int a) {
-    return (a > 0 ? a : -a);
-}
-```
-
-```c++
-int abs(int a) {
-    int mask = a >> 31;
-    a ^= mask;
-    a -= mask;
-    return a;
-}
-```
-
--->
-
-### Larger Examples
-
-**Strings.** Oversimplifying things, an `std::string` is comprised of a pointer to a null-terminated `char` array (also known as a "C-string") allocated somewhere on the heap and one integer containing the string size.
-
-A common value for a string is the empty string — which is also its default value. You also need to handle them somehow, and the idiomatic approach is to assign `nullptr` as the pointer and `0` as the string size, and then check if the pointer is null or if the size is zero at the beginning of every procedure involving strings.
-
-However, this requires a separate branch, which is costly (unless the majority of strings are either empty or non-empty). To remove the check and thus also the branch, we can allocate a "zero C-string," which is just a zero byte allocated somewhere, and then simply point all empty strings there. Now all string operations with empty strings have to read this useless zero byte, but this is still much cheaper than a branch misprediction.
-
-**Binary search.** The standard binary search [can be implemented](/hpc/data-structures/binary-search) without branches, and on small arrays (that fit into cache) it works ~4x faster than the branchy `std::lower_bound`:
+**Binary search. 二分查找** 标准二分查找可以无分支实现,在小数组（适合缓存）上可以比`std::lower_bound` 快4倍:
 
 ```c++
 int lower_bound(int x) {
@@ -200,25 +128,15 @@ int lower_bound(int x) {
 }
 ```
 
-Other than being more complex, it has another slight drawback in that it potentially does more comparisons (constant $\lceil \log_2 n \rceil$ instead of either $\lfloor \log_2 n \rfloor$ or $\lceil \log_2 n \rceil$) and can't speculate on future memory reads (which acts as prefetching, so it loses on very large arrays).
 
-In general, data structures are made branchless by implicitly or explicitly *padding* them so that their operations take a constant number of iterations. Refer to [the article](/hpc/data-structures/binary-search) for more complex examples.
+除了更复杂之外，他还有另一个小缺点，它可能会执行更多的比较（常量 $\lceil \log_2 n \rceil$  而不是  $\lfloor \log_2 n \rfloor$ 或者 $\lceil \log_2 n \rceil$），而且无法推测未来的内存读取。
 
-<!--
+通常，数据结构通过隐式或显式填充数据来实现无分支，以便其操作进行恒定的迭代次数。有关更复杂的示例，请参阅[文章](https://en.algorithmica.org/hpc/data-structures/binary-search/)。
 
-The only downside of the branchless implementation is that it potentially does more memory reads: 
 
-There are typically two ways to achieve this:
+**Data-parallel programming.** 无分支编程对SIMD应用十分重要，因为它们没有分支
 
-And in general, data structures can be "padded" to be made constant size or height.
-
-That there are no substantial reasons why compilers can't do this on their own, but unfortunately this is just how it is right now.
-
--->
-
-**Data-parallel programming.** Branchless programming is very important for [SIMD](/hpc/simd) applications because they don't have branching in the first place.
-
-In our array sum example, removing the `volatile` type qualifier from the accumulator allows the compiler to [vectorize](/hpc/simd/auto-vectorization) the loop:
+在我们的数组求和示例中，从累加器中删除 `volatile` 类型限定符允许编译器对循环进行矢量化：
 
 ```c++
 /* volatile */ int s = 0;
@@ -228,14 +146,6 @@ for (int i = 0; i < N; i++)
         s += a[i];
 ```
 
-It now works in ~0.3 per element, which is mainly [bottlenecked by the memory](/hpc/cpu-cache/bandwidth).
+它现在每个元素工作~0.3循环，主要是内存的瓶颈。
 
-The compiler is usually able to vectorize any loop that doesn't have branches or dependencies between the iterations — and some specific small deviations from that, such as [reductions](/hpc/simd/reduction) or simple loops that contain just one if-without-else. Vectorization of anything more complex is a very nontrivial problem, which may involve various techniques such as [masking](/hpc/simd/masking) and [in-register permutations](/hpc/simd/shuffling).
-
-<!--
-
-**Binary exponentiation.** However, when it is constant
-
-When we can iterate in small batches, [autovectorization](/hpc/simd/autovectorization) speeds it up 13x.
-
--->
+编译器通常能够对迭代之间没有分支或依赖关系的任何循环进行矢量化，以及一些特定的小偏差，例如仅包含一个 if-without-else 的简化或简单循环。任何更复杂的矢量化都是一个非常重要的问题，它可能涉及各种技术，例如masking和寄存器内排列。
