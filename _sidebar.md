@@ -27,15 +27,17 @@
     - [3.6. 吞吐量计算](003-pipelining/throughput.md)
     - [3.7. Theoretical Performance Limits](003-pipelining/limits.md)
 
-4. Compilation
- 4.1. Stages of Compilation
- 4.2. Flags and Targets
- 4.3. Situational Optimizations
- 4.4. Contract Programming
- 4.5. Non-Zero-Cost Abstractions
- 4.6. Compile-Time Computation
- 4.7. Arithmetic Optimizations
- 4.8. What Compilers Can and Can't Do
+- [4. 编译](004-compilation/)
+
+    - [4.1. 编译阶段](004-compilation/stages.md)
+    - [4.2. Flags and Targets](004-compilation)
+    - [4.3. Situational Optimizations](004-compilation)
+    - [4.4. Contract Programming](004-compilation)
+    - [4.5. Non-Zero-Cost Abstractions](004-compilation)
+    - [4.6. Compile-Time Computation](004-compilation)
+    - [4.7. Arithmetic Optimizations](004-compilation)
+    - [4.8. What Compilers Can and Can't Do](004-compilation)
+
 5. Profiling
  5.1. Instrumentation
  5.2. Statistical Profiling
