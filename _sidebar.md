@@ -24,7 +24,7 @@
     - [3.3. 无分支编程](003-pipelining/branchless.md)
     - [3.4. 指令表](003-pipelining/tables.md)
     - [3.5. Instruction Scheduling](003-pipelining/scheduling.md)
-    - [3.6. Throughput Computing](003-pipelining/throughput.md)
+    - [3.6. 吞吐量计算](003-pipelining/throughput.md)
     - [3.7. Theoretical Performance Limits](003-pipelining/limits.md)
 
 4. Compilation

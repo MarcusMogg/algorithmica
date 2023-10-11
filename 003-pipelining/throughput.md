@@ -1,18 +1,14 @@
----
-title: Throughput Computing
-weight: 4
----
 
-Optimizing for *latency* is usually quite different from optimizing for *throughput*:
 
-- When optimizing data structure queries or small one-time or branchy algorithms, you need to [look up the latencies](../tables) of its instructions, mentally construct the execution graph of the computation, and then try to reorganize it so that the critical path is shorter. <!-- [Binary GCD](/hpc/algorithms/gcd) is a good example of that. -->
-- When optimizing hot loops and large-dataset algorithms, you need to look up the throughputs of their instructions, count how many times each one is used per iteration, determine which of them is the bottleneck, and then try to restructure the loop so that it is used less often.
+优化*latency* 通常和 优化*throughput* 非常不同：
 
-The last advice only works for *data-parallel* loops, where each iteration is fully independent of the previous one. When there is some interdependency between consecutive iterations, there may potentially be a pipeline stall caused by a [data hazard](../hazards) as the next iteration is waiting for the previous one to complete.
+- 当优化数据结构查询、小型一次性 或者分支算法时，你需要查找 指令的延迟，在心中构建计算的执行图，然后尝试对其进行重组以缩短关键路径长度。
+- 在优化热循环或者大数据集算法时，你需要查找指令的吞吐量，计算每次迭代花费多少时间，确定其中那些是瓶颈，然后尝试重新组织循环，以减少它的耗时。
 
-### Example
+后一个建议仅在数据并行 循环上有效，每一个迭代和之前是完全无关的。当连续的迭代之间存在关联性，会出现很多 data hazard 导致的流水线停顿，下一代迭代需要等待之前的完全完成
+## 例子
 
-As a simple example, consider how the sum of an array is computed:
+一个简单的例子，计算数组和
 
 ```c++
 int s = 0;
@@ -21,7 +17,7 @@ for (int i = 0; i < n; i++)
     s += a[i];
 ```
 
-Let's assume for a moment that the compiler doesn't [vectorize](/hpc/simd) this loop, [the memory bandwidth](/hpc/cpu-cache/bandwidth) isn't a concern, and that the loop is [unrolled](/hpc/architecture/loops) so that we don't pay any additional cost associated with maintaining the loop variables. In this case, the computation becomes very simple:
+让我们假设编译器没有向量化循环，内存带宽不需要考虑，循环已经被展开所以我们不需要额外花费在循环变量上。这样，计算可以变得十分简单：
 
 ```c++
 int s = 0;
@@ -32,13 +28,11 @@ s += a[3];
 // ...
 ```
 
-How fast can we compute this? At exactly one cycle per element — because we need one cycle each iteration to `add` another value to `s`. The latency of the memory read doesn't matter because the CPU can start it ahead of time.
+现在计算多快？ 实际上每个周期一个元素，因为我们每个迭代需要花费一个周期 `add` 另一个值到`s`中。 内存读取的延迟并不重要，因为CPU可以提取执行。
 
-But we can go higher than that. The *throughput* of `add`[^throughput] is 2 on my CPU (Zen 2), meaning we could theoretically execute two of them every cycle. But right now this isn't possible: while `s` is being used to accumulate $i$-th element, it can't be used for $(i+1)$-th for at least one cycle.
+但是我们可以更快。在我的CPU上 `add` 的吞吐量是2，这意味着我们可以每个周期执行两个加法。 但现在是不可能的，因为当s用于第i个元素，至少一个周期内它不能用在第 i+1个元素 
 
-[^throughput]: The throughput of register-register `add` is 4, but since we are reading its second operand from memory, it is bottlenecked by the throughput of memory `mov`, which is 2 on Zen 2.
-
-The solution is to use *two* accumulators and just sum up odd and and even elements separately:
+解决方案是使用两个值 ，分别计算偶数和奇数的和
 
 ```c++
 int s0 = 0, s1 = 0;
@@ -50,44 +44,15 @@ s1 += a[3];
 int s = s0 + s1;
 ```
 
-Now our superscalar CPU can execute these two "threads" simultaneously, and our computation no longer has any critical paths that limit the throughput.
 
-<!--
+现在我们的超标量处理器可以同时执行两个“线程“，我们的计算没有吞吐量限制的 关键路径。
 
-By the virtue of out-of-order execution
+## The General Case 通用例子
 
--->
+如果一个指令有 延迟 `x` 和吞吐量 `y`,那你需要使用  $x \cdot y$  个累加器来使其饱和。这也意味着你需要花费  $x \cdot y$ 个逻辑寄存器来保存它们的值，这是CPU设计的一个重要考虑例子，限制了高延迟指令的最大可用执行单元数。
 
-### The General Case
+此技术主要用于 SIMD，而不是标量代码。您可以泛化上面的代码，并比编译器更快地计算总和和其他约简。
 
-If an instruction has a latency of $x$ and a throughput of $y$, then you would need to use $x \cdot y$ accumulators to saturate it. This also implies that you need $x \cdot y$ logical registers to hold their values, which is an important consideration for CPU designs, limiting the maximum number of usable execution units for high-latency instructions.
 
-This technique is mostly used with [SIMD](/hpc/simd) and not in scalar code. You can [generalize](/hpc/simd/reduction) the code above and compute sums and other reductions faster than the compiler.
+在优化循环时，通常只有一个或几个执行端口，您希望充分利用它们，并且围绕它们设计循环的其余部分。由于不同的指令可能使用不同的端口集，因此并不总是清楚哪个端口会被过度使用。在这种情况下，机器代码分析器对于查找小型装配循环的瓶颈非常有帮助。
 
-In general, when optimizing loops, you usually have just one or a few *execution ports* that you want to utilize to their fullest, and you engineer the rest of the loop around them. As different instructions may use different sets of ports, it is not always clear which one is going to be overused. In situations like this, [machine code analyzers](/hpc/profiling/mca) can be very helpful for finding the bottlenecks of small assembly loops.
-
-<!--
-
-Compilers don't always produce the optimal code.
-
-This only applies to the variables that you have to preserve between iterations. You can "fire and forget" instructions that compute temporary values as much as you want.
-
-Memory operations may have [very high latencies](/hpc/cpu-cache/latency), but you don't need hundreds or registers for them because  because they are bottlenecked for different reasons.
-
-But they are bottlenecked for different reasons.
-
-You still need to imaging execution graph, but now loop it around. In most cases, there is one instruction that is the bottleneck.
-
-This is different. For single-invocation procedures you essentially want to minimize the latency on the critical data path. For stuff that gets called in a loop, you need to maximize throughput.
-
-Bandwidth is the rate at which data can be read or stored. For the purpose of designing algorithms, a more important characteristic is the bandwidth-latency product which basically tells how many cache lines you can request while waiting for the first one without queueing up. It is around 5 or more on most systems. This is like having friends whom you can send for beers asynchronously.
-
-In the previous version, we have an inherently sequential chain of operations in the innermost loop. We accumulate the minimum in variable v by a sequence of min operations. There is no way to start the second operation before we know the result of the first operation; there is no room for parallelism here:
-
-The result will be clearly the same, but we are calculating the operations in a different order. In essence, we split the work in two independent parts, calculating the minimum of odd elements and the minimum of even elements, and finally combining the results. If we calculate the odd minimum v0 and even minimum v1 in an interleaved manner, as shown above, we will have more opportunities for parallelism. For example, the 1st and 2nd operation could be calculated simultaneously in parallel (or they could be executed in a pipelined fashion in the same execution unit). Once these results are available, the 3rd and 4th operation could be calculated simultaneously in parallel, etc. We could potentially obtain a speedup of a factor of 2 here, and naturally the same idea could be extended to calculating, e.g., 4 minimums in an interleaved fashion.
-
-Instruction-level parallelism is automatic Now that we know how to reorganize calculations so that there is potential for parallelism, we will need to know how to realize the potential. For example, if we have these two operations in the C++ code, how do we tell the computer that the operations can be safely executed in parallel?
-
-The delightful answer is that it happens completely automatically, there is nothing we need to do (and nothing we can do)!
-
--->
