@@ -1,15 +1,17 @@
----
-title: Precomputation
-weight: 8
----
 
-When compilers can infer that a certain variable does not depend on any user-provided data, they can compute its value during compile time and turn it into a constant by embedding it into the generated machine code.
+> 不如看这篇文章 https://zhuanlan.zhihu.com/p/350429113
 
-This optimization helps performance a lot, but it is not a part of the C++ standard, so compilers don't *have to* do that. When a compile-time computation is either hard to implement or time-intensive, a compiler may pass on that opportunity.
 
-### Constant Expressions
+
+当编译器识别到一个变量不依赖任何用户提供的数据，它们可以在编译时对其进行计算，然后转换为编码到机器码中的常量值。
+
+
+这个优化对性能有很大帮助，但它不是C++标准的一部分（c++20之后 consteval），所以编译器不一定非要这样做。当编译时计算实在难以实现或者非常耗时时，编译器可能会跳过它。
+
+## 常量表达式
 
 For a more reliable solution, in modern C++ you can mark a function as `constexpr`; if it is called by passing constants its value is guaranteed to be computed during compile time:
+
 
 ```c++
 constexpr int fibonacci(int n) {
@@ -63,18 +65,3 @@ for (int i = 0; i < 100; i++)
 
 In this example, even though technically we perform a constant number of iterations and call `fibonacci` with parameters known at compile time, they are technically not compile-time constants. It's up to the compiler whether to optimize this loop or not — and for heavy computations, it often chooses not to.
 
-<!--
-
-### Code Generation
-
-There are plenty of languages that support computing *data* during compile time, but none can produce efficient code at all times.
-
-One huge example is generating lexers and parsers: which is usually done in.
-
-For example, CUDA and OpenCL are mostly C, and have no support for metaprogramming.
-
-At some point (and perhaps to this day), these languages had no way to unroll loops, so people would write a [jinja template](https://jinja.palletsprojects.com/en/3.0.x/), call the thing from Python, and then compile.
-
-It is not uncommon to use a templating engine to generate code. For example, CUDA (a GPU programming language) has no loop unrolling
-
--->
