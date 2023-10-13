@@ -1,23 +1,12 @@
----
-title: Situational Optimizations
-weight: 3
----
 
-<!--
+`-O2` and `-O3` 中启用的大部分优化 保证可以提升、或者至少不损害性能。 `-O3`  中不包含的选项 可能是不严格满足编译标准，或者是高度情景化的，需要程序员的额外输入来保证使用是有益的。
 
-Generally, you always want to specify the exact platform you are running and turn on `-O3`, but other optimizations, like the ones discussed [in the previous section](../assembly), are far more situational and require some input from the programmer.
+让我们讨论一下最常用的那些。
+## Loop Unrolling 循环展开
 
--->
+循环展开默认不启用，除非循环迭代次数是一个小的编译期常数—— 这种情况下会被完全替换为一个完全无跳转 的重复序列。可以使用`-funroll-loops`  标志全局启用，该标志将展开所有循环，如果其迭代次数可以在编译时或进入循环时确定。
 
-Most compiler optimizations enabled by `-O2` and `-O3` are guaranteed to either improve or at least not seriously hurt performance. Those that aren't included in `-O3` are either not strictly standard-compliant, or highly circumstantial and require some additional input from the programmer to help decide whether using them is beneficial.
-
-Let's discuss the most frequently used ones that we've also previously covered in this book.
-
-### Loop Unrolling
-
-[Loop unrolling](/hpc/architecture/loops#loop-unrolling) is disabled by default, unless the loop takes a small constant number of iterations known at compile time — in which case it will be replaced with a completely jump-free, repeated sequence of instructions. It can be enabled globally with the `-funroll-loops` flag, which will unroll all loops whose number of iterations can be determined at compile time or upon entry to the loop.
-
-You can also use a pragma to target a specific loop:
+你也可以使用 pragma 标记一个指定的循环：
 
 ```c++
 #pragma GCC unroll 4
@@ -26,11 +15,12 @@ for (int i = 0; i < n; i++) {
 }
 ```
 
-Loop unrolling makes binary larger, and may or may not make it run faster. Don't use it fanatically.
 
-### Function Inlining
+循环展开会使二进制变大，而且可能并不会使允许变快，所以不要狂热的使用它。
 
-[Inlining](/hpc/architecture/functions#inlining) is best left for the compiler to decide, but you can influence it with `inline` keyword:
+## Function Inlining
+
+inline 最好让编译器来决定，但你可以使用 `inline` 关键词来影响它
 
 ```c++
 inline int square(int x) {
@@ -38,17 +28,19 @@ inline int square(int x) {
 }
 ```
 
-The hint may be ignored though if the compiler thinks that the potential performance gains are not worth it. You can force inlining by adding the `always_inline` attribute:
+
+这个提示可能被编译器忽略，如果它认为潜在的性能收益不知道。你可以使用`always_inline` 属性来强制使用内联
 
 ```c++
 #define FORCE_INLINE inline __attribute__((always_inline))
 ```
 
-There is also the `-finline-limit=n` option which lets you set a specific threshold on the size of inlined functions (in terms of the number of instructions). Its Clang equivalent is `-inline-threshold`.
+也有一个`-finline-limit=n`选项 可以让你指定内联函数大小（指令数量）的门槛。Clang等价选项`-inline-threshold`.
 
-### Likeliness of Branches
+## Likeliness of Branches 分支可能性
 
-[Likeliness of branches](/hpc/architecture/layout#unequal-branches) can be hinted by `[[likely]]` and `[[unlikely]]` attributes in `if`-s and `switch`-es:
+
+分支（if switch）可能性可以使用`[[likely]]` and `[[unlikely]]` 属性进行提示：
 
 ```c++
 int factorial(int n) {
@@ -59,7 +51,7 @@ int factorial(int n) {
 }
 ```
 
-This is a new feature that only appeared in C++20. Before that, there were compiler-specific intrinsics similarly used to wrap condition expressions. The same example in older GCC:
+这是C++20中的新特性。在这之前，有编译器特定的intrinsics包装条件表达式。GCC例子：
 
 ```c++
 int factorial(int n) {
@@ -70,42 +62,37 @@ int factorial(int n) {
 }
 ```
 
-<!--
-What it usually does is it swaps the branches so that the more likely one goes immediately after jump (recall that "don't jump" branch is taken by default). The performance gain is usually rather small, because for most hot spots hardware branch prediction works just fine.
--->
 
-There are many other cases like this when you need to point the compiler in the right direction, but we will get to them later when they become more relevant.
+当你需要告诉编译器正确的方向时，有很多像这样的其他例子，我们将在稍后相关的时候介绍
 
-### Profile-Guided Optimization
+## Profile-Guided Optimization
 
-Adding all this metadata to the source code is tedious. People already hate writing C++ even without having to do it.
+添加这些元信息到源代码中是无聊的，人们已经厌烦写C++代码.
 
-It is also not always obvious whether certain optimizations are beneficial or not. To make a decision about branch reordering, function inlining, or loop unrolling, we need answers to questions like these:
+而且这样的优化是否有益往往不是很明显。为了决定是否执行分支重排、循环展开，我们需要回答这些问题：
 
-- How often is this branch taken?
-- How often is this function called?
-- What is the average number of iterations in this loop?
+- 分支使用的频率?
+- 函数调用的频率？
+- 循环迭代次数的平均值?
 
-Luckily for us, there is a way to provide this real-world information automatically.
 
-*Profile-guided optimization* (PGO, also called "pogo" because it's easier and more fun to pronounce) is a technique that uses [profiling data](/hpc/profiling) to improve performance beyond what can be achieved with just static analysis. In a nutshell, it involves adding timers and counters to the points of interest in the program, compiling and running it on real data, and then compiling it again, but this time supplying additional information from the test run.
+幸运的是，有方式自动提供真实世界信息
 
-The whole process is automated by modern compilers. For example, the `-fprofile-generate` flag will let GCC instrument the program with profiling code:
+*Profile-guided optimization* (PGOe) 是使用 profile数据改善性能的技术，而不仅仅是静态分析所能实现的。简单来说，它将计时器和计数器添加到程序中的感兴趣的点，在真实数据上编译和运行它，然后再次编译它，但这次额外提供了来自测试运行的额外信息。
+
+
+整个流程对现代编译器是自动化的。例如：`-fprofile-generate` 让 GCC使用分析代码来检查程序
 
 ```
 g++ -fprofile-generate [other flags] source.cc -o binary
 ```
 
-After we run the program — preferably on input that is as representative of the real use case as possible — it will create a bunch of `*.gcda` files that contain log data for the test run, after which we can rebuild the program, but now adding the `-fprofile-use` flag:
+
+在我们运行程序之后——最好是在尽可能代表真实用例的输入上——它将创建一堆包含测试运行的日志数据的`*.gcda`文件，之后我们可以重建程序，并添加标志 `-fprofile-use` ：
 
 ```
 g++ -fprofile-use [other flags] source.cc -o binary
 ```
 
-It usually improves performance by 10-20% for large codebases, and for this reason it is commonly included in the build process of performance-critical projects. This is more reason to invest in solid benchmarking code.
+对于大型代码库，它通常会将性能提高 10-20%，因此，它通常用在性能关键型项目的构建过程中。这是投资可靠的基准测试代码的更多理由。
 
-<!--
-
-We will study how profiling works more deeply in the [next chapter](../../profiling).
-
--->

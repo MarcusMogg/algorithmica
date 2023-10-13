@@ -30,13 +30,13 @@
 - [4. 编译](004-compilation/)
 
     - [4.1. 编译阶段](004-compilation/stages.md)
-    - [4.2. Flags and Targets](004-compilation)
-    - [4.3. Situational Optimizations](004-compilation)
-    - [4.4. Contract Programming](004-compilation)
-    - [4.5. Non-Zero-Cost Abstractions](004-compilation)
-    - [4.6. Compile-Time Computation](004-compilation)
-    - [4.7. Arithmetic Optimizations](004-compilation)
-    - [4.8. What Compilers Can and Can't Do](004-compilation)
+    - [4.2. Flags and Targets](004-compilation/flags.md)
+    - [4.3. 情景优化](004-compilation/situational.md)
+    - [4.4. 契约编程](004-compilation/contracts.md)
+    - [4.5. Non-Zero-Cost Abstractions](004-compilation/abstractions.md)
+    - [4.6. 编译期计算](004-compilation/precalc.md)
+    - [4.7. Arithmetic Optimizations](004-compilation/arithmetic.md)
+    - [4.8. What Compilers Can and Can't Do](004-compilation/limitations.md)
 
 5. Profiling
  5.1. Instrumentation

@@ -1,41 +1,35 @@
----
-title: Flags and Targets
-weight: 2
-published: true
----
 
-The first step of getting high performance from the compiler is to ask for it, which is done with over a hundred different compiler options, attributes, and pragmas.
+从编译器获得高性能的第一步是要求它优化，这是通过一百多种不同的编译器选项、属性和编译指示来完成的。
 
-### Optimization Levels
+## 优化等级
 
-There are 4 *and a half* main levels of optimization for speed in GCC:
+GCC中的优化有四个半 主要级别：
 
-- `-O0` is the default one that does no optimizations (although, in a sense, it does optimize: for compilation time).
-- `-O1` (also aliased as `-O`) does a few "low-hanging fruit" optimizations, almost not affecting the compilation time.
-- `-O2` enables all optimizations that are known to have little to no negative side effects and take a reasonable time to complete (this is what most projects use for production builds).
-- `-O3` does very aggressive optimization, enabling almost all *correct* optimizations implemented in GCC.
-- `-Ofast` does everything in `-O3`, plus a few more optimizations flags that may break strict standard compliance, but not in a way that would be critical for most applications (e.g., floating-point operations may be rearranged so that the result is off by a few bits in the mantissa).
+- `-O0` 默认，不执行任何优化 (不过它的确优化了编译速度).
+- `-O1` (别名 `-O`) 执行一些唾手可得的优化，几乎不影响编译时间.
+- `-O2` 启用所有已知 几乎无负面效果 而且可以在合理时间内编译的优化(这是大部分项目生产环境使用的).
+- `-O3` 采用非常激进的优化, 启用几乎所有在GCC中实现的 *正确* 优化.
+- `-Ofast` 执行所有 `-O3`操作,外加一部分可能违反严格合规性标准的优化标志, 但对大部分应用来说不重要的 (e.g., 浮点运算可能会重新排列，造成结果在尾数中偏差几位).
 
-There are also many other optimization flags that are not included even in `-Ofast`, because they are very situational, and enabling them by default is more likely to hurt performance rather than improve it — we will talk about some of them in [the next section](../situational).
+还有许多其他标志甚至 不在`-Ofast`中，因为它们非常情景化，默认启用更有可能损害性能。我们将在下一小节讨论部分
 
-### Specifying Targets
+## Specifying Targets 指定目标
 
-The next thing you may want to do is to tell the compiler more about the computer(s) this code is supposed to be run on: the smaller the set of platforms is, the better. By default, it will generate binaries that can run on any relatively new (>2000) x86 CPU. The simplest way to narrow it down is to pass `-march` flag to specify the exact microarchitecture: `-march=haswell`. If you are compiling on the same computer that will run the binary, you can use `-march=native` for auto-detection.
+你可能要做的下一件事 是 告诉编译器 更多关于运行此代码的计算机的信息：平台集越小越好。默认情况下，会生成在在任何相对较新的 （>2000） x86 CPU 上运行的二进制文件。缩小范围的最简单方式是 使用 `-march` 值得具体的微体系结构：`-march=haswell`。如果在将运行二进制文件的同一台计算机上进行编译，则可以用于 `-march=native` 自动检测。
 
-The instruction sets are generally backward-compatible, so it is often enough to just use the name of the oldest microarchitecture you need to support. A more robust approach is to list specific features that the CPU is guaranteed to have: `-mavx2`, `-mpopcnt`. When you just want to *tune* the program for a particular machine without using any instructions that may crash it on incompatible CPUs, you can use the `-mtune` flag (by default `-march=x` also implies `-mtune=x`).
+指令集通常是向后兼容的，因此你只需要指定你需要支持的最老版本。一个更 鲁棒的方式是 列出来 CPU保证支持的特性： `-mavx2`, `-mpopcnt`。当您只想为特定机器调整程序而不使用任何可能在不兼容的 CPU 上导致崩溃的指令时，你可以使用`-mtune` 标志（`-march=x` 默认也使用 `-mtune=x`）
 
-These options can also be specified for a compilation unit with pragmas instead of compilation flags:
+这些选项也可以在代码里使用 pragmas
 
 ```c++
 #pragma GCC optimize("O3")
 #pragma GCC target("avx2")
 ```
 
-This is useful when you need to optimize a single high-performance procedure without increasing the build time for the entire project.
+但你需要优化一个 单独的高性能步骤 时，这样是有用的，不用忍受整个项目的编译时间增加
+## Multiversioned Functions 多版本函数
 
-### Multiversioned Functions
-
-Sometimes you may also want to provide several architecture-specific implementations in a single library. You can use attribute-based syntax to select between multiversioned functions automatically during compile time:
+有些时候你想要在一个单独的库里面提供多种体系结构相关实现时，你可以使用attribute 语法来在编译期从多版本函数中自动选择：
 
 ```c++
 __attribute__(( target("default") )) // fallback implementation
@@ -52,4 +46,4 @@ int popcnt(int x) {
 }
 ```
 
-In Clang, you can't use pragmas to set target and optimization flags from the source code, but you can use attributes the same way as in GCC.
+在 Clang 中，不能使用pragma从源代码中设置目标和优化标志，但可以像在 GCC 中一样attributes。
