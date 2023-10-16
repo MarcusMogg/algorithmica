@@ -38,13 +38,15 @@
     - [4.7. Arithmetic Optimizations](004-compilation/arithmetic.md)
     - [4.8. What Compilers Can and Can't Do](004-compilation/limitations.md)
 
-5. Profiling
- 5.1. Instrumentation
- 5.2. Statistical Profiling
- 5.3. Program Simulation
- 5.4. Machine Code Analyzers
- 5.5. Benchmarking
- 5.6. Getting Accurate Results
+- [5. Profiling](005-profiling)
+
+    - [5.1. Instrumentation](005-profiling)
+    - [5.2. Statistical Profiling](005-profiling)
+    - [5.3. Program Simulation](005-profiling)
+    - [5.4. Machine Code Analyzers](005-profiling)
+    - [5.5. Benchmarking](005-profiling)
+    - [5.6. Getting Accurate Results](005-profiling)
+
 6. Arithmetic
  6.1. Floating-Point Numbers
  6.2. Interval Arithmetic
