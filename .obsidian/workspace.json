@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "002-architecture/layout.md",
+                "file": "005-profiling/README.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "002-architecture/layout.md",
+                "file": "005-profiling/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "002-architecture/layout.md",
+                "file": "005-profiling/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "002-architecture/layout.md"
+                "file": "005-profiling/README.md"
               }
             }
           }
@@ -146,31 +146,34 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "1a44722d7966affd",
+  "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "004-compilation/precalc.md",
+    "003-pipelining/tables.md",
+    "004-compilation/README.md",
+    "004-compilation/_index.md",
     "004-compilation/stages.md",
     "004-compilation/situational.md",
-    "004-compilation/README.md",
-    "004-compilation/precalc.md",
     "004-compilation/limitations.md",
     "004-compilation/flags.md",
     "004-compilation/contracts.md",
     "004-compilation/arithmetic.md",
     "004-compilation/abstractions.md",
     "004-compilation",
-    "003-pipelining/img/probabilities.svg",
-    "003-pipelining/img/superscalar.png",
-    "003-pipelining/img/pipeline.png",
-    "003-pipelining/img/bubble.png",
-    "003-pipelining/img/branchy-vs-branchless.svg",
-    "003-pipelining/throughput.md",
-    "003-pipelining/tables.md",
-    "003-pipelining/scheduling.md",
-    "003-pipelining/README.md",
-    "003-pipelining/limits.md",
-    "003-pipelining/hazards.md",
     "003-pipelining/branchless.md",
     "003-pipelining/branching.md",
+    "003-pipelining/hazards.md",
+    "003-pipelining/README.md",
+    "002-architecture/layout.md",
+    "003-pipelining/img/probabilities.svg",
+    "003-pipelining/img/superscalar.png",
+    "003-pipelining/img/branchy-vs-branchless.svg",
+    "003-pipelining/img/bubble.png",
+    "003-pipelining/img/pipeline.png",
+    "003-pipelining/_index.md",
+    "003-pipelining/throughput.md",
+    "003-pipelining/scheduling.md",
+    "003-pipelining/limits.md",
     "003-pipelining/img",
     "003-pipelining",
     "002-architecture/indirect.md",
@@ -178,11 +181,8 @@
     "002-architecture/functions.md",
     "002-architecture/interaction.md",
     "002-architecture/assembly.md",
-    "002-architecture/layout.md",
     "002-architecture/isa.md",
     "data-structures/img/binary-heat.png",
-    "002-architecture/loops.md",
-    "002-architecture/README.md",
     "002-architecture/img/pdf.png",
     "002-architecture/img/clt.png",
     "002-architecture/img/monte-carlo.gif",
