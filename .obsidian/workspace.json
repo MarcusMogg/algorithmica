@@ -13,24 +13,13 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "005-profiling/README.md",
+                "file": "005-profiling/events.md",
                 "mode": "source",
                 "source": false
               }
             }
-          },
-          {
-            "id": "7d6041ef297612af",
-            "type": "leaf",
-            "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.4.16"
-              }
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -96,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "005-profiling/README.md",
+                "file": "005-profiling/events.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "005-profiling/README.md",
+                "file": "005-profiling/events.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -136,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "005-profiling/README.md"
+                "file": "005-profiling/events.md"
               }
             }
           }
@@ -157,8 +146,11 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "7d6041ef297612af",
+  "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "005-profiling/instrumentation.md",
+    "005-profiling/events.md",
+    "005-profiling/README.md",
     "004-compilation/precalc.md",
     "003-pipelining/tables.md",
     "004-compilation/README.md",
@@ -190,9 +182,6 @@
     "002-architecture/indirect.md",
     "_sidebar.md",
     "002-architecture/functions.md",
-    "002-architecture/interaction.md",
-    "002-architecture/assembly.md",
-    "002-architecture/isa.md",
     "data-structures/img/binary-heat.png",
     "002-architecture/img/pdf.png",
     "002-architecture/img/clt.png",
