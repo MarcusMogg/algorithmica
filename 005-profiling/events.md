@@ -1,31 +1,26 @@
----
-title: Statistical Profiling
-weight: 2
----
 
-[Instrumentation](../instrumentation) is a rather tedious way of doing profiling, especially if you are interested in multiple small sections of the program. And even if it can be partially automated by the tooling, it still won't help you gather some fine-grained statistics because of its inherent overhead.
+Instrumentation 进行 profiling 是一个相当麻烦的方法，特别是当你对程序中的多个小节感兴趣。而且即便它可以部分由工具自动完成，它固有的开销也让你无法进行更细致的分析。
 
-Another, less invasive approach to profiling is to interrupt the execution of a program at random intervals and look where the instruction pointer is. The number of times the pointer stopped in each function's block would be roughly proportional to the total time spent executing these functions. You can also get some other useful information this way, like finding out which functions are called by which functions by inspecting [the call stack](/hpc/architecture/functions).
+另一种侵入性比较小的分析方式是 以随机间隔暂停程序，然后查看指令指针。指针在每个函数块听停留的次数，和执行函数花费的时间大致成比例。你也可以使用这种方式得到其他有用信息，比如通过观察调用栈 找到一个函数被哪些函数调用。
 
-This could, in principle, be done by just running a program with `gdb` and `ctrl+c`'ing it at random intervals but modern CPUs and operating systems provide special utilities for this type of profiling.
+原则上来说，这可以通过`gdb`运行程序 + 随机执行`ctrl+c`来完成，但是现代CPU和操作系统提供了专门的工具来完成这种类型的 分析。
+## 硬件事件
 
-### Hardware Events
+硬件性能计数器*performance counters*  是微处理器内置的特殊的寄存器s，可以存储多个特定的硬件相关活动。在集成电路上添加是便宜的，因为它们基本上只是连接有激活线(?)的二进制计数器。
 
-Hardware *performance counters* are special registers built into microprocessors that can store the counts of certain hardware-related activities. They are cheap to add on a microchip, as they are basically just binary counters with an activation wire connected to them.
+每个性能计数器 链接到一个大的电路集，而且可以配置为在特定的硬件事件时增加，比如 分支预测错误、缓存失效。你可以在程序开始时将 计数器置为0，然后运行，然后在结束时输出存储的值，它等于在执行期间 特定事件被触发的次数。
 
-Each performance counter is connected to a large subset of circuitry and can be configured to be incremented on a particular hardware event, such as a branch mispredict or a cache miss. You can reset a counter at the start of a program, run it, and output its stored value at the end, and it will be equal to the exact number of times a certain event has been triggered throughout the execution.
+你也可以使用多路执行 来跟踪多个事件，即 在固定的时间间隔 暂停程序，然后重新配置计数器。 这种场景下结果可能不是精确的，但是统计学上接近。一个细节是它不能通过简单地增加采样频率来增加准确性，因为这样会影响性能因此扭曲分布，所以为了执行多个分析，你需要执行程序一个长的周期。
 
-You can also keep track of multiple events by multiplexing between them, that is, stopping the program in even intervals and reconfiguring the counters. The result in this case will not be exact, but a statistical approximation. One nuance here is that its accuracy can’t be improved by simply increasing the sampling frequency because it would affect the performance too much and thus skew the distribution, so to collect multiple statistics, you would need to run the program for longer periods of time.
+总的来说，事件驱动的统计 分析 通常是最有效 而且简单的方案来诊断性能问题。
 
-Overall, event-driven statistical profiling is usually the most effective and easy way to diagnose performance issues.
+## perf
 
-### Profiling with perf
+依赖上述的事件采样技术的性能分析器 称为*statistical profilers* 。有多种，但本书中主要使用的是 [perf](https://perf.wiki.kernel.org/)，linux内核装载的一个 statistical profilers。 在非linux平台，可以使用Intel 提供的  [VTune](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/vtune-profiler.html#gs.cuc0ks) ，几乎提供了相同的功能。
 
-Performance analysis tools that rely on the event sampling techniques described above are called *statistical profilers*. There are many of them, but the one we will mainly use in this book is [perf](https://perf.wiki.kernel.org/), which is a statistical profiler shipped with the Linux kernel. On non-Linux systems, you can use [VTune](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/vtune-profiler.html#gs.cuc0ks) from Intel, which provides roughly the same functionality for our purposes. It is available for free, although it is proprietary, and you need to refresh your community license every 90 days, while perf is free as in freedom.
+perf是一个命令行工具，它基于程序的执行实时生成报告。它不需要源代码 而且可以 分析非常多的应用，即使是那些涉及多个进程和与操作系统交互的应用程序。
 
-Perf is a command-line application that generates reports based on the live execution of programs. It does not need the source and can profile a very wide range of applications, even those that involve multiple processes and interaction with the operating system.
-
-For explanation purposes, I have written a small program that creates an array of a million random integers, sorts it, and then does a million binary searches on it:
+出于解释目的，我编写了一个小程序，它创建一个由一百万个随机整数组成的数组，对其进行排序，然后对其进行一百万个二分搜索：
 
 ```c++
 void setup() {
@@ -44,7 +39,7 @@ int query() {
 }
 ```
 
-After compiling it (`g++ -O3 -march=native example.cc -o run`), we can run it with `perf stat ./run`, which outputs the counts of basic performance events during its execution:
+编译之后 (`g++ -O3 -march=native example.cc -o run`), 可以使用perf运行 `perf stat ./run`, 输出执行期间基本性能事件的计数:
 
 ```yaml
  Performance counter stats for './run':
@@ -66,9 +61,10 @@ After compiling it (`g++ -O3 -march=native example.cc -o run`), we can run it wi
    0.000000000 seconds sys
 ```
 
-You can see that the execution took 0.53 seconds or 852M cycles at an effective 1.32 GHz clock rate, over which 479M instructions were executed. There were also 122.7M branches, and 15.7% of them were mispredicted.
 
-You can get a list of all supported events with `perf list`, and then specify a list of specific events you want with the `-e` option. For example, for diagnosing binary search, we mostly care about cache misses:
+你可以看到这个执行花费 0.53s 或者说 1.32GHz时钟频率下 852M循环，479M指令被执行。有 122.7M  分支，其中 15.7% 预测失败。
+
+你可以使用 `perf list` 获取 所以支持的事件，让后使用 `-e` 选项🔝一系列你想要的数据。例如，为了诊断二分搜索，我们主要关注 缓存未命中:
 
 ```yaml
 > perf stat -e cache-references,cache-misses ./run
@@ -77,11 +73,11 @@ You can get a list of all supported events with `perf list`, and then specify a 
 44,991,746      cache-misses:u      # 49.440 % of all cache refs
 ```
 
-By itself, `perf stat` simply sets up performance counters for the whole program. It can tell you the total number of branch mispredictions, but it won't tell you *where* they are happening, let alone *why* they are happening.
+就其本身而言， `perf stat` 只需为整个程序设置性能计数器。它可以告诉你分支错误预测的总数，但它不会告诉你它们在哪里发生，更不用说它们为什么会发生了。
 
-To try the stop-the-world approach we discussed previously, we need to use `perf record <cmd>`, which records profiling data and dumps it as a `perf.data` file, and then call `perf report` to inspect it. I highly advise you to go and try it yourselves because the last command is interactive and colorful, but for those that can't do it right now, I'll try to describe it the best I can.
+为了尝试之前说的 stop-the-world 方式，我们需要使用 `perf record <cmd>`，它会记录分析数据，然后导出为`perf.data` 文件，然后使用`perf report` 进行分析。
 
-When you call `perf report`, it first displays a `top`-like interactive report that tells you which functions are taking how much time:
+当你调用`perf report`，它首先会展示一个 `top`类似的交互报告，告诉你 每个函数被执行多少次：
 
 ```
 Overhead  Command  Shared Object        Symbol
@@ -93,9 +89,10 @@ Overhead  Command  Shared Object        Symbol
    0.80%  run      libc-2.33.so         [.] rand
 ```
 
-Note that, for each function, just its *overhead* is listed and not the total running time (e.g., `setup` includes `std::__introsort_loop` but only its own overhead is accounted as 3.43%). There are tools for constructing [flame graphs](https://www.brendangregg.com/flamegraphs.html) out of perf reports to make them more clear. You also need to account for possible inlining, which is apparently what happened with `std::lower_bound` here. Perf also tracks shared libraries (like `libc`) and, in general, any other spawned processes: if you want, you can launch a web browser with perf and see what's happening inside.
 
-Next, you can "zoom in" on any of these functions, and, among others things, it will offer to show you its disassembly with an associated heatmap. For example, here is the assembly for `query`:
+注意，对每个函数，只有它的*overhead* 被列出，而不是总的执行时间（e.g., `setup` 包含 `std::__introsort_loop`但是只有它自身的overhead 被统计为  3.43%）。有工具可以将perf 报告组织为  [火焰图](https://www.brendangregg.com/flamegraphs.html) ，以使它们更清晰。你还需要考虑到 可能的inline，这显然是发生在`std::lower_bound`。Perf 还跟踪共享库（如 `libc` ），通常还跟踪任何其他生成的进程：如果需要，您可以使用 perf 启动 Web 浏览器并查看其中发生了什么。
+
+然后，你可以在这些函数的任何地方进行“缩放”，它将提供带有相关热力图的反汇编。例如，下面是 `query`的汇编
 
 ```asm
        │20: → call   rand@plt
@@ -122,8 +119,6 @@ Next, you can "zoom in" on any of these functions, and, among others things, it 
        │    ↑ jne    20
 ```
 
-On the left column is the fraction of times that the instruction pointer stopped on a specific line. You can see that we spend ~65% of the time on the jump instruction because it has a comparison operator before it, indicating that the control flow waits there for this comparison to be decided.
+左列是指令指针在特定行上停止的次数。你可以看到，我们在跳转指令上花费了 ~65% 的时间，因为它前面有一个比较运算符，表明控制流在那里等待这个比较的决定。
 
-Because of intricacies such as [pipelining](/hpc/pipelining) and out-of-order execution, "now" is not a well-defined concept in modern CPUs, so the data is slightly inaccurate as the instruction pointer drifts a little bit forward. The instruction-level data is still useful, but at the individual cycle level, we need to switch to [something more precise](../simulation).
-
-<!-- flame graphs -->
+由于流水线和无序执行等复杂性，“now”在现代 CPU 中不是一个定义明确的概念，因此当指令指针向前漂移一点时，数据略有不准确。指令级数据仍然有用，但在单个周期级别，我们需要切换到更精确的东西。
