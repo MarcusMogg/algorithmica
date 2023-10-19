@@ -41,9 +41,9 @@
 - [5. Profiling](005-profiling)
 
     - [5.1. Instrumentation](005-profiling/instrumentation.md)
-    - [5.2. Statistical Profiling](005-profiling/events.md)
-    - [5.3. Program Simulation](005-profiling)
-    - [5.4. Machine Code Analyzers](005-profiling)
+    - [5.2. 统计分析](005-profiling/events.md)
+    - [5.3. 程序模拟](005-profiling/simulation.md)
+    - [5.4. 机器码分析](005-profiling/mca.md)
     - [5.5. Benchmarking](005-profiling)
     - [5.6. Getting Accurate Results](005-profiling)
 

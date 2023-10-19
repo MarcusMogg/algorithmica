@@ -1,17 +1,14 @@
----
-title: Machine Code Analyzers
-weight: 4
----
 
-A *machine code analyzer* is a program that takes a small snippet of assembly code and [simulates](../simulation) its execution on a particular microarchitecture using information available to compilers, and outputs the latency and throughput of the whole block, as well as cycle-perfect utilization of various resources within the CPU.
+机器代码分析器是一种程序，它使用一小段汇编代码，并使用编译器可用的信息模拟其在特定微架构上的执行，并输出整个块的延迟和吞吐量，以及CPU内各种资源的周期执行利用率。
 
-### Using `llvm-mca`
+## 使用 `llvm-mca`
 
-There are many different machine code analyzers, but I personally prefer `llvm-mca`, which you can probably install via a package manager together with `clang`. You can also access it through a web-based tool called [UICA](https://uica.uops.info) or in the [Compiler Explorer](https://godbolt.org/) by selecting "Analysis" as the language.
 
-What `llvm-mca` does is it runs a set number of iterations of a given assembly snippet and computes statistics about the resource usage of each instruction, which is useful for finding out where the bottleneck is.
+有很多机器码分析工具，我个人喜欢 `llvm-mca`，你可能通过包管理器和 `clang`一起安装。你可以使用在线工具[UICA](https://uica.uops.info) 或者在  [Compiler Explorer](https://godbolt.org/) 中 选中"Analysis" 作为语言
 
-We will consider the array sum as our simple example:
+`llvm-mca` 的作用是多次运行给定汇编片段，并计算有关每个指令的资源使用情况的统计信息，这对于找出瓶颈所在非常有用。
+
+将数组总和视为我们的简单示例：
 
 ```asm
 loop:
@@ -21,7 +18,7 @@ loop:
     jne	 loop
 ````
 
-Here is its analysis with `llvm-mca` for the Skylake microarchitecture:
+以下是 `llvm-mca` 对Skylake微架构的分析：
 
 ```yaml
 Iterations:        100
@@ -35,14 +32,14 @@ IPC:               3.70
 Block RThroughput: 0.8
 ```
 
-First, it outputs general information about the loop and the hardware:
+首先，它输出有关循环和硬件的通用信息：
 
-- It "ran" the loop 100 times, executing 400 instructions in total in 108 cycles, which is the same as executing $\frac{400}{108} \approx 3.7$ [instructions per cycle](/hpc/complexity/hardware) on average (IPC).
-- The CPU is theoretically capable of executing up to 6 instructions per cycle ([dispatch width](/hpc/architecture/layout)).
-- Each cycle in theory can be executed in 0.8 cycles on average ([block reciprocal throughput](/hpc/pipelining/tables)).
-- The "uOps" here are the micro-operations that the CPU splits each instruction into (e.g., fused load-add is composed of two uOps).
+- 它“运行”循环 100 次，在 108 个周期内总共执行 400 条指令，这与平均每个周期执行指令 （IPC） $\frac{400}{108} \approx 3.7$ 相同
+-  CPU理论上每个周期可以执行6个指令（Dispatch Width）
+- 理论上每个循环平均可以在0.8个周期内执行（Block RThroughput）。
+- 这里的“uOps”是CPU将每条指令拆分为的微操作（例如，融合的load-add由两个uOp组成）。
 
-Then it proceeds to give information about each individual instruction: 
+然后它继续提供有关每个单独指令的信息：
 
 ```yaml
 Instruction Info:
@@ -60,13 +57,13 @@ Instruction Info:
  1      1     0.50                        jne	-11
 ```
 
-There is nothing there that there isn't in the [instruction tables](/hpc/pipelining/tables):
+这里没有不在指令表的信息：
 
-- how many uOps each instruction is split into;
-- how many cycles each instruction takes to complete (latency);
-- how many cycles each instruction takes to complete in the amortized sense (reciprocal throughput), considering that several copies of it can be executed simultaneously.
+- 每条指令被拆分为多少uOps;
+- 每条指令完成需要多少个周期（延迟);
+- 每条指令在摊销意义上（倒数吞吐量）需要多少个周期才能完成，考虑到它可以同时执行它的多个副本.
 
-Then it outputs probably the most important part — which instructions are executing when and where:
+然后它输出可能是最重要的部分 —— 哪些指令在何时何地执行：
 
 ```yaml
 Resource pressure by instruction:
@@ -77,12 +74,4 @@ Resource pressure by instruction:
  -      -     0.99    -      -      -      -      -     0.01    -     jne  -11
 ```
 
-As the contention for execution ports causes [structural hazards](/hpc/pipelining/hazards), ports often become the bottleneck for throughput-oriented loops, and this chart helps diagnose why. It does not give you a cycle-perfect Gantt chart of something like that, but it gives you the aggregate statistics of the execution ports used for each instruction, which lets you find which one is overloaded.
-
-<!--
-
-A CPU is a very complicated thing, but in essence, there are several "ports" that specialize on particular kinds of instructions. These ports often become the bottleneck, and the chart above helps in diagnosing why.
-
-We are not ready to discuss how this works yet, but will talk about it in detail in the last chapter.
-
--->
+由于对执行端口的争用会导致structural hazards，因此端口通常成为面向吞吐量的循环的瓶颈，此图表有助于诊断原因。它不会给你一个周期完美的甘特图，但它给你用于每条指令的执行端口的聚合统计数据，让你找到哪个指令是负载高。
