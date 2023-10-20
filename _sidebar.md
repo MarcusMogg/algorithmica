@@ -44,7 +44,7 @@
     - [5.2. 统计分析](005-profiling/events.md)
     - [5.3. 程序模拟](005-profiling/simulation.md)
     - [5.4. 机器码分析](005-profiling/mca.md)
-    - [5.5. Benchmarking](005-profiling)
+    - [5.5. Benchmarking](005-profiling/benchmarking.md)
     - [5.6. Getting Accurate Results](005-profiling)
 
 6. Arithmetic
