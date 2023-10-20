@@ -45,7 +45,7 @@
     - [5.3. 程序模拟](005-profiling/simulation.md)
     - [5.4. 机器码分析](005-profiling/mca.md)
     - [5.5. Benchmarking](005-profiling/benchmarking.md)
-    - [5.6. Getting Accurate Results](005-profiling)
+    - [5.6. 获取准确的结果](005-profiling/noise.md)
 
 6. Arithmetic
  6.1. Floating-Point Numbers

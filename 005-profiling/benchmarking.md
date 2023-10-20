@@ -1,23 +1,19 @@
----
-title: Benchmarking
-weight: 6
----
 
-Most good software engineering practices in one way or another address the issue of making *development cycles* faster: you want to compile your software faster (build systems), catch bugs as soon as possible (static analysis, continuous integration), release as soon as the new version is ready (continuous deployment), and react to user feedback without much delay (agile development).
+大多数好的软件工程实践都以某种方式解决了使开发周期更快的问题：您希望更快地编译软件（构建系统），尽快捕获错误（静态分析，持续集成），在新版本准备就绪后立即发布（持续部署），毫不拖延地对用户反馈做出反应（敏捷开发）。
 
-Performance engineering is not different. If you do it correctly, it should also resemble a cycle:
+性能工程也不例外。如果你做得正确，它也应该类似于一个循环：
 
-1. Run the program and collect metrics.
-2. Figure out where the bottleneck is.
-3. Remove the bottleneck and go to step 1.
+1. 执行程序并收集指标.
+2. 找到瓶颈.
+3. 移除瓶颈然后回到步骤1.
 
-In this section, we will talk about benchmarking and discuss some practical techniques that make this cycle shorter and help you iterate faster. Most of the advice comes from working on this book, so you can find many real examples of described setups in the [code repository](https://github.com/sslotin/ahm-code) for this book.
+在本节中，我们将讨论基准测试，并讨论一些实用技术，这个循环更短，并帮助你更快地迭代。大部分建议来自本书的工作，因此您可以在本书的[代码存储库](https://github.com/sslotin/ahm-code)中找到许多描述设置的真实示例。
 
-### Benchmarking Inside C++
+## C++ 中的基准测试
 
-There are several approaches to writing benchmarking code. Perhaps the most popular one is to include several same-language implementations you want to compare in one file, separately invoke them from the `main` function, and calculate all the metrics you want in the same source file.
+编写基准测试的方法有很多。也许最流行的方法是在一个文件中包含要比较的几个相同语言的实现，在 `main` 函数中单独调用它们，并在同一源文件中计算所需的所有指标。
 
-The disadvantage of this method is that you need to write a lot of boilerplate code and duplicate it for each implementation, but it can be partially neutralized with metaprogramming. For example, when you are benchmarking multiple [gcd](/hpc/algorithms/gcd) implementations, you can reduce benchmarking code considerably with this higher-order function:
+这种方法的缺点是你需要编写大量的样板代码，并为每个实现复制它，但可以通过元编程部分减少。例如，当您对多个 gcd 实现进行基准测试时，您可以使用以下高阶函数大大减少基准测试代码：
 
 ```c++
 const int N = 1e6, T = 1e9 / N;
@@ -51,15 +47,18 @@ int main() {
 }
 ```
 
-This is a very low-overhead method that lets you run more experiments and [get more accurate results](../noise) from them. You still have to perform some repeated actions, but they can be largely automated with frameworks, [Google benchmark library](https://github.com/google/benchmark) being the most popular choice for C++. Some programming languages also have handy built-in tools for benchmarking: special mention here goes to [Python's timeit function](https://docs.python.org/3/library/timeit.html) and [Julia's @benchmark macro](https://github.com/JuliaCI/BenchmarkTools.jl).
 
-Although *efficient* in terms of execution speed, C and C++ are not the most *productive* languages, especially when it comes to analytics. When your algorithm depends on some parameters such as the input size, and you need to collect more than just one data point from each implementation, you really want to integrate your benchmarking code with the outside environment and analyze the results using something else.
+这是一种开销非常低的方法，可让您运行更多实验并从中获得准确的结果。您仍然需要执行一些重复的操作，但它们可以通过框架在很大程度上实现自动化，[Google benchmark library](https://github.com/google/benchmark) 是C++最受欢迎的选择。一些编程语言也有方便的内置工具进行基准测试：这里特别提到 [Python's timeit function](https://docs.python.org/3/library/timeit.html)和[Julia's @benchmark macro](https://github.com/JuliaCI/BenchmarkTools.jl).。
 
-### Splitting Up Implementations
+尽管在执行速度方面效率很高，但 C 和 C++ 并不是最高效的语言，尤其是在分析方面。当您的算法依赖于某些参数（例如输入大小）并且您需要从每个实现中收集多个数据点时，您确实希望将基准测试代码与外部环境集成, 并使用其他程序分析结果。
 
-One way to improve modularity and reusability is to separate all testing and analytics code from the actual implementation of the algorithm, and also make it so that different versions are implemented in separate files, but have the same interface.
+## Splitting Up Implementations
+
+提高模块化和可重用性的一种方法是 将所有测试和分析代码与算法的实际实现分开，并使不同的文件中实现不同的版本，但具有相同的接口。
 
 In C/C++, you can do this by creating a single header file (e.g., `gcd.hh`) with a function interface and all its benchmarking code in `main`:
+
+在 C/C++ 中，您可以通过创建一个带有函数接口的单个头文件（例如， `gcd.hh` ），`main`里面有所有的测试代码 来做到这一点：
 
 ```c++
 int gcd(int a, int b); // to be implemented
@@ -93,7 +92,8 @@ int main() {
 }
 ```
 
-Then you create many implementation files for each algorithm version (e.g., `v1.cc`, `v2.cc`, and so on, or some meaningful names if applicable) that all include that single header file:
+
+然后，为每个算法版本创建许多实现文件（例如：`v2.cc` ，`v1.cc` 或一些有意义的名称），这些文件都包含该同一个头文件
 
 ```c++
 #include "gcd.hh"
@@ -106,7 +106,7 @@ int gcd(int a, int b) {
 }
 ```
 
-The whole purpose of doing this is to be able to benchmark a specific algorithm version from the command line without touching any source code files. For this purpose, you may also want to expose any parameters that it may have — for example, by parsing them from the command line arguments:
+这样做的全部目的是能够从命令行对特定算法版本进行基准测试，而无需接触任何源代码文件。为此，您可能还希望公开它可能具有的任何参数，例如，通过从命令行参数解析它们：
 
 ```c++
 int main(int argc, char* argv[]) {
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 }
 ```
 
-Another way to do it is to use C-style global defines and then pass them with the `-D N=...` flag during compilation:
+另一种方法是使用 C 风格的全局定义，然后在编译期间将它们与 `-D N=...` 标志一起传递：
 
 ```c++
 #ifndef N
@@ -127,15 +127,14 @@ Another way to do it is to use C-style global defines and then pass them with th
 const int T = 1e9 / N;
 ```
 
-This way you can make use of compile-time constants, which may be very beneficial for the performance of some algorithms, at the expense of having to re-build the program each time you want to change the parameter, which considerably increases the time you need to collect metrics across a range of parameter values.
+通过这种方式，您可以使用编译时常量，这可能对某些算法的性能非常有益，但代价是每次要更改参数时都必须重新构建程序，这大大增加了跨一系列参数值收集指标所需的时间。
 
-### Makefiles
+## Makefile
 
-<!-- TODO -->
 
-Splitting up source files allows you to speed up compilation using a caching build system such as [Make](https://en.wikipedia.org/wiki/Make_(software)).
+通过拆分源文件，可以使用缓存生成系统（如 Make）加快编译速度。
 
-I usually carry a version of this Makefile across my projects:
+我通常在我的项目中携带这个 Makefile 的一个版本：
 
 ```c++
 compile = g++ -std=c++17 -O3 -march=native -Wall
@@ -152,15 +151,15 @@ compile = g++ -std=c++17 -O3 -march=native -Wall
 .PHONY: %.run
 ```
 
-You can now compile `example.cc` with `make example`, and automatically run it with `make example.run`. 
+现在，您可以使用`make example`进行编译，并使用`make example.run` 自动运行 。
 
-You can also add scripts for calculating statistics in the Makefile, or incorporate it with `perf stat` calls to make profiling automatic.
+您还可以在生成文件中添加用于计算统计信息的脚本，或将其与`perf stat` 调用合并 以使分析自动进行。
+## Jupyter Notebooks
 
-### Jupyter Notebooks
 
-To speed up high-level analytics, you can create a Jupyter notebook where you put all your scripts and do all the plots.
+为了加快分析速度，您可以创建一个 Jupyter 笔记本，可以在其中放置所有脚本并执行所有绘图。
 
-It is convenient to add a wrapper for benchmarking an implementation, which just returns a scalar result:
+添加用于对实现进行基准测试的包装器很方便，它只返回标量结果：
 
 ```python
 def bench(source, n=2**20):
@@ -172,7 +171,7 @@ def bench(source, n=2**20):
     return duration
 ```
 
-Then you can use it to write clean analytics code:
+然后，您可以使用它来编写干净的分析代码:
 
 ```python
 ns = list(int(1.17**k) for k in range(30, 60))
@@ -186,4 +185,4 @@ plt.plot(ns, [x / y for x, y in zip(baseline, results)])
 plt.show()
 ```
 
-Once established, this workflow makes you iterate much faster and focus on optimizing the algorithm itself.
+此工作流建立后将使您更快地迭代并专注于优化算法本身。
