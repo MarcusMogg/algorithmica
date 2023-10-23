@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "005-profiling/benchmarking.md",
+                "file": "006-arithmetic/float.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "005-profiling/benchmarking.md",
+                "file": "006-arithmetic/float.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "005-profiling/benchmarking.md",
+                "file": "006-arithmetic/float.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "005-profiling/benchmarking.md"
+                "file": "006-arithmetic/float.md"
               }
             }
           }
@@ -148,6 +148,31 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "005-profiling/noise.md",
+    "006-arithmetic/README.md",
+    "006-arithmetic/img/roots.png",
+    "006-arithmetic/img/mnist.png",
+    "006-arithmetic/img/permutation.png",
+    "006-arithmetic/img/norm.svg",
+    "006-arithmetic/img/newton.png",
+    "006-arithmetic/img/iq.svg",
+    "006-arithmetic/img/clock.gif",
+    "006-arithmetic/img/iq.jpg",
+    "006-arithmetic/img/complex-circle.png",
+    "006-arithmetic/img/float.svg",
+    "006-arithmetic/rsqrt.md",
+    "006-arithmetic/_index.md",
+    "006-arithmetic/integer.md",
+    "006-arithmetic/newton.md",
+    "006-arithmetic/ieee-754.md",
+    "006-arithmetic/float.md",
+    "006-arithmetic/img",
+    "006-arithmetic/division.md",
+    "006-arithmetic/errors.md",
+    "006-arithmetic/compression.md",
+    "006-arithmetic/bit-hacks.md",
+    "006-arithmetic",
+    "005-profiling/benchmarking.md",
     "005-profiling/events.md",
     "005-profiling/instrumentation.md",
     "005-profiling/README.md",
@@ -161,32 +186,9 @@
     "004-compilation/flags.md",
     "004-compilation/contracts.md",
     "004-compilation/arithmetic.md",
-    "004-compilation/abstractions.md",
     "004-compilation",
-    "003-pipelining/branchless.md",
-    "003-pipelining/branching.md",
-    "003-pipelining/hazards.md",
-    "003-pipelining/README.md",
-    "002-architecture/layout.md",
-    "003-pipelining/img/probabilities.svg",
-    "003-pipelining/img/superscalar.png",
-    "003-pipelining/img/branchy-vs-branchless.svg",
-    "003-pipelining/img/bubble.png",
-    "003-pipelining/img/pipeline.png",
-    "003-pipelining/_index.md",
-    "003-pipelining/throughput.md",
-    "003-pipelining/scheduling.md",
-    "003-pipelining/limits.md",
     "003-pipelining/img",
     "003-pipelining",
-    "002-architecture/indirect.md",
-    "_sidebar.md",
-    "002-architecture/functions.md",
-    "data-structures/img/binary-heat.png",
-    "002-architecture/img/pdf.png",
-    "002-architecture/img/clt.png",
-    "002-architecture/img/monte-carlo.gif",
-    "002-architecture/img/birthday.png",
     "002-architecture/img",
     "002-architecture",
     "hpc/arithmetic",

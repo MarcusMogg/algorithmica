@@ -47,15 +47,17 @@
     - [5.5. Benchmarking](005-profiling/benchmarking.md)
     - [5.6. 获取准确的结果](005-profiling/noise.md)
 
-6. Arithmetic
- 6.1. Floating-Point Numbers
- 6.2. Interval Arithmetic
- 6.3. Newton's Method
- 6.4. Fast Inverse Square Root
- 6.5. Integers
- 6.6. Integer Division
- 6.7. Bit Manipulation
-(6.8. Data Compression)
+- [6. 算术](006-arithmetic)
+
+    - [6.1. 浮点数](006-arithmetic/float.md)
+    - [6.2. Interval Arithmetic](006-arithmetic)
+    - [6.3. Newton's Method](006-arithmetic)
+    - [6.4. Fast Inverse Square Root](006-arithmetic)
+    - [6.5. Integers](006-arithmetic)
+    - [6.6. Integer Division](006-arithmetic)
+    - [6.7. Bit Manipulation](006-arithmetic)
+    - [6.8. Data Compression)](006-arithmetic)
+
 7. Number Theory
  7.1. Modular Inverse
  7.2. Montgomery Multiplication
