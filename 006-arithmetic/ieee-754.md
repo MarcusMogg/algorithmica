@@ -1,33 +1,29 @@
----
-title: IEEE 754 Floats
-weight: 2
----
 
-When we designed our [DIY floating-point type](../float), we omitted quite a lot of important little details:
+当我们设计 DIY 浮点类型时，我们省略了很多重要的小细节：
 
-- How many bits do we dedicate for the mantissa and the exponent?
-- Does a `0` sign bit mean `+`, or is it the other way around?
-- How are these bits stored in memory?
-- How do we represent 0?
-- How exactly does rounding happen?
-- What happens if we divide by zero?
-- What happens if we take the square root of a negative number?
-- What happens if we increment the largest representable number?
-- Can we somehow detect if one of the above three happened?
+- 我们为尾数和指数留了多少位？
+- `0` 符号位是表示 `+` ，还是相反？
+- 这些位如何存储在内存中？
+- 如何表示0？
+- 四舍五入究竟是如何发生的？
+- 除0时会发生什么？
+- 如果我们取负数的平方根会发生什么？
+- 如果我们把最大的可表示数字加一会发生什么？
+- 我们能否以某种方式检测出上述三种情况之一是否发生了？
 
-Most of the early computers didn't support floating-point arithmetic, and when vendors started adding floating-point coprocessors, they had slightly different visions for what the answers to these questions should be. Diverse implementations made it difficult to use floating-point arithmetic reliably and portably — especially for the people who develop compilers.
+大多数早期的计算机不支持浮点运算，当供应商开始添加浮点协处理器时，他们对这些问题的答案的看法略有不同。多样化的实现使得可靠和可移植地使用浮点算法变得困难——特别是对于开发编译器的人来说。
 
-In 1985, the Institute of Electrical and Electronics Engineers published a standard (called [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754)) that provided a formal specification of how floating-point numbers should work, which was quickly adopted by the vendors and is now used in virtually all general-purpose computers.
+1985年，IEEE 发布了一项标准（称为[IEEE 754](https://en.wikipedia.org/wiki/IEEE_754)），该标准提供了浮点数应如何工作的正式规范，该规范很快被供应商采用，现在几乎用于所有通用计算机。
 
-## Float Formats
+## 浮点格式
 
-Similar to our handmade float implementation, hardware floats use one bit for sign and a variable number of bits for the exponent and the mantissa parts. For example, the standard 32-bit `float` encoding uses the first (highest) bit for sign, the next 8 bits for the exponent, and the 23 remaining bits for the mantissa. 
+类似于我们自己制作的浮点实现，硬件浮点数使用一个位作为符号，可变数量的位用于指数和尾数部分。例如，标准的 32 位`float`编码使用第一个（最高）位作为符号，接下来的 8 位作为指数，剩余的 23 位  用于尾数。
 
 ![](../img/float.svg)
 
-One of the reasons why they are stored in this exact order is that it is easier to compare and sort them: you can use mostly the same comparator circuit as for [unsigned integers](../integer), except for maybe flipping some bits in case one of the numbers is negative.
+它们以这种顺序存储的原因之一是更容易比较和排序它们：您可以使用与无符号整数大致相同的比较器电路，除了在其中一个数字为负数的情况下可能会翻转一些位。
 
-For the same reason, the exponent is *biased:* the actual value is 127 less than the stored unsigned integer, which lets us also cover the values less than one (with negative exponents). In the example above:
+出于同样的原因，指数是有偏差的：实际值比存储的无符号整数小 127，这让我们也可以覆盖小于 1 的值（带有负指数）。在上面的示例中：
 
 $$
 (-1)^0 \times 2^{01111100_2 - 127} \times (1 + 2^{-2})
@@ -36,7 +32,7 @@ $$
 = 0.15625
 $$
 
-IEEE 754 and a few consequent standards define not one but *several* representations that differ in sizes, most notably:
+IEEE 754 和一些后续标准定义了大小不同的表示形式，不是一种而是几种表示形式，最值得注意的是：
 
 |      Type | Sign | Exponent | Mantissa | Total bits | Approx. decimal digits |
 |----------:|------|----------|----------|------------|------------------------|
@@ -47,39 +43,39 @@ IEEE 754 and a few consequent standards define not one but *several* representat
 | quadruple | 1    | 15       | 112      | 128        | ~34.0                  |
 |  bfloat16 | 1    | 8        | 7        | 16         | ~2.3                   |
 
-Their availability ranges from chip to chip:
+它们的可用性范围从芯片到芯片：
 
-- Most CPUs support single- and double-precision — which is what `float` and `double` types refer to in C.
-- Extended formats are exclusive to x86, and are available in C as the `long double` type, which falls back to double precision on Arm CPUs. The choice of 64 bits for mantissa is so that every `long long` integer can be represented exactly. There is also a 40-bit format that similarly allocates 32 mantissa bits.
-- Quadruple as well as the 256-bit "octuple" formats are only used for specific scientific computations and are not supported by general-purpose hardware.
-- Half-precision arithmetic only supports a small subset of operations and is generally used for applications such as machine learning, especially neural networks, because they tend to perform large amounts of calculations but don't require high levels of precision.
-- Half-precision is being gradually replaced by bfloat, which trades off 3 mantissa bits to have the same range as single-precision, enabling interoperability with it. It is mostly being adopted by specialized hardware: TPUs, FGPAs, and GPUs. The name stands for "[Brain](https://en.wikipedia.org/wiki/Google_Brain) float."
+- 大多数 CPU 都支持单精度和双精度——就是 C 中的 `float` 和 `double` 类型。
+- extended格式是 x86 独有的，在 C 中作为 `long double` 类型提供，在 Arm CPU 上回退到双精度。选择64位作为尾数是为了让每个 `long long` 整数都可以精确地表示。还有一个 40 位格式，类似的分配 32 个尾数位。
+- Quadruple和256位“octuple”格式仅用于特定的科学计算，通用硬件不支持。
+- Half-precision 仅支持一小部分运算，通常用于机器学习等应用，尤其是神经网络，因为它们倾向于执行大量计算，但不需要高水平的精度。.
+- Half-precision 正逐渐被 bfloat 取代，bfloat 减少 3 个尾数位，使其具有与单精度相同的范围，从而实现与它的互操作性。它主要被专用硬件采用: TPUs, FGPAs, and GPUs. 它的名字表示 "[Brain](https://en.wikipedia.org/wiki/Google_Brain) float."
 
-Lower-precision types need less memory bandwidth to move them around and usually take fewer cycles to operate on (e.g., the division instruction may take $x$, $y$, or $z$ cycles depending on the type), which is why they are preferred when error tolerance allows it.
+低精度类型需要较少的内存带宽来移动它们，并且通常需要更少的周期来操作（例如，除法指令可能需要 $x$, $y$, or $z$  周期，具体取决于类型），这就是为什么当容错允许时它们成为首选的原因。
 
-Deep learning, emerging as a very popular and computationally-intensive field, created a huge demand for low-precision matrix multiplication, which led to manufacturers developing separate hardware or at least adding specialized instructions that support these types of computations — most notably, Google developing a custom chip called TPU (*tensor processing unit*) that specializes on multiplying 128-by-128 bfloat matrices, and NVIDIA adding "tensor cores," capable of performing 4-by-4 matrix multiplication in one go, to all their newer GPUs.
+深度学习作为一个非常流行和计算密集型的领域出现，创造了对低精度矩阵乘法的巨大需求，这导致制造商开发单独的硬件或至少添加支持这些类型计算的专用指令——最值得注意的是，谷歌开发了一种名为 TPU（*tensor processing unit*）的定制芯片，专门用于乘以 128-128 个bfloat矩阵， NVIDIA 在其所有较新的 GPU 中添加了“tensor cores”，能够一次性执行 4 x 4 矩阵乘法。
 
-Apart from their sizes, most of the behavior is the same between all floating-point types, which we will now clarify.
+除了它们的大小之外，所有浮点类型之间的大多数行为都是相同的。
 
-## Handling Corner Cases
+## 处理极端情况
 
-The default way integer arithmetic deals with corner cases such as division by zero is to crash.
+整数算术处理极端情况（如除以零）的默认方式是崩溃。
 
-Sometimes a software crash, in turn, causes a real, physical one. In 1996, the maiden flight of the [Ariane 5](https://en.wikipedia.org/wiki/Ariane_5) (the space launch vehicle that ESA uses to lift stuff into low Earth orbit) ended in [a catastrophic explosion](https://www.youtube.com/watch?v=gp_D8r-2hwk) due to the policy of aborting computation on arithmetic error, which in this case was a floating-point to integer conversion overflow, that led to the navigation system thinking that it was off course and making a large correction, eventually causing the disintegration of a $200M rocket.
+有时，软件崩溃会导致真实的物理崩溃。1996年，[阿丽亚娜5号](https://en.wikipedia.org/wiki/Ariane_5)（欧空局用来将东西送入低地球轨道的太空运载火箭）的首飞以灾难性的爆炸告终，原因是[中止算术误差计算](https://www.youtube.com/watch?v=gp_D8r-2hwk)的策略，浮点到整数转换溢出，导致导航系统认为它偏离了航线并进行大量修正，最终导致一枚价值2亿美元的火箭解体。
 
-There is a way to gracefully handle corner cases like these: hardware interrupts. When an exception occurs, the CPU
+有一种方法可以优雅地处理这样的极端情况：硬件中断。发生异常时，CPU:
 
-- interrupts the execution of a program;
-- packs all relevant information into a data structure called "interrupt vector";
-- passes it to the operating system, which in turn either calls the handling code if it exists (the "try-except" block) or terminates the program otherwise.
+- 中断程序的执行;
+- 将所有相关信息打包到称为“中断向量”的数据结构中;
+- 将其传递给操作系统，操作系统反过来调用处理代码（如果存在）（“try-except”块），否则终止程序。
 
-This is a complex mechanism that deserves an article of its own, but since this is a book about performance, the only thing you need to know is that they are quite slow and not desirable in real-time systems such as navigating rockets.
+这是一个复杂的机制，值得单独写一篇文章，但由于这是一本关于性能的书，你唯一需要知道的是它们非常慢，在导航火箭等实时系统中不可取。
 
 ### NaNs, Zeros and Infinities
 
-Floating-point arithmetic often deals with noisy, real-world data. Exceptions there are much more common than in the integer case, and for this reason, the default behavior when handling them is different. Instead of crashing, the result is substituted with a special value without interrupting the program execution (unless the programmer explicitly wants it to).
+浮点运算通常处理嘈杂的真实世界数据。异常比整数情况更常见，因此，处理它们时的默认行为是不同的。结果不会崩溃，而是用特殊值替换，而不会中断程序执行（除非程序员明确希望它崩溃）。
 
-The first type of such value is the two infinities: a positive and a negative one. They are generated if the result of an operation can't fit within the representable range, and they are treated as such in arithmetic.
+这种值的第一种类型是两个无穷大：一个正值和一个负数。如果运算的结果不在可表示的范围，则会生成它们，并且在算术中将它们视为这样。
 
 $$
 \begin{aligned}
@@ -89,27 +85,29 @@ $$
 \end{aligned}
 $$
 
-What happens if we, say, divide a value by zero? Should it be a negative or a positive infinity? This case is actually unambiguous because, somewhat less intuitively, there are also two zeros: a positive and a negative one.
+
+比如说，如果我们把一个值除以零会发生什么？应该是负无穷大还是正无穷大？这种情况实际上是明确的，但是不太直观，有两个零：一个正零和一个负零。
 
 $$
           \frac{1}{+0} = +∞
 \;\;\;\;  \frac{1}{-0} = -∞
 $$
 
-Fun fact: `x + 0.0` can't be folded to `x`, but `x + (-0.0)` can, so the negative zero is a better initializer value than the positive zero as it is more likely to be optimized away by the compiler. The reason why `+0.0` doesn't work is that IEEE says that `+0.0 + -0.0 == +0.0`, so it will give a wrong answer for `x = -0.0`. The presence of two zeros frequently causes headaches like this — good news that you can pass `-fno-signed-zeros` to the compiler if you want to disable this behavior.
+有趣的事实： `x + 0.0` 不能折叠到 `x` ，但 `x + (-0.0)` 可以，所以负零是比正零更好的初始值设定项值，因为它更有可能被编译器优化掉。 `+0.0` 之所以不工作，是因为IEEE是这么规定的 `+0.0 + -0.0 == +0.0` ，所以`x = -0.0`会给出一个错误的答案  。两个零的存在经常会引起这样的头痛 - 如果你想禁用这种行为，你可以传递 `-fno-signed-zeros` 给编译器。
 
-Zeros are encoded by setting all bits to zero, except for the sign bit in the negative case. Infinities are encoded by setting all their exponent bits to one and all mantissa bits to zero, with the sign bit distinguishing between positive and negative infinity.
 
-The other type is the "not-a-number” (NaN), which is generated as the result of mathematically incorrect operations:
+零是通过将所有位设置为零来编码的，负0中的符号位除外。无穷大是通过将其所有指数位设置为 1 和所有尾数位设置为0来编码的，符号位区分正无穷大和负无穷大。
+
+另一种类型是“非数字”"not-a-number” （NaN），它是由于数学上不正确的操作而生成的：
 
 $$
 \log(-1),\; \arccos(1.01),\; ∞ − ∞,\; −∞ + ∞,\; 0 × ∞,\; 0 ÷ 0,\; ∞ ÷ ∞
 $$
 
-There are two types of NaNs: a *signaling NaN* and a *quiet NaN*. A signaling NaN raises an exception flag, which may or may not cause immediate hardware interrupt depending on the FPU configuration, while a quiet NaN just propagates through almost every arithmetic operation, resulting in more NaNs.
+有两种类型的NaN：信令NaN和安静NaN。信令 NaN 会引发异常标志，根据 FPU 配置，这可能会或可能不会立即导致硬件中断，而安静的 NaN 只会通过几乎每个算术运算传播，从而导致更多的 NaN。
 
-In binary, both NaNs have their exponent bits all set and the mantissa part being anything other than all zeros (to distinguish them from infinities). Note that there are *very* many valid encodings for a NaN.
+在二进制中，两个 NaN 都有它们的指数位全部设置，尾数部分不是所有零（以将它们与无穷大区分开来）。请注意，NaN 有很多有效的编码。
 
-## Further Reading
+## 拓展阅读
 
 If you are so inclined, you can read the classic "[What Every Computer Scientist Should Know About Floating-Point Arithmetic](https://www.itu.dk/~sestoft/bachelor/IEEE754_article.pdf)" (1991) and [the paper introducing Grisu3](https://www.cs.tufts.edu/~nr/cs257/archive/florian-loitsch/printf.pdf), the current state-of-the-art for printing floating-point numbers.

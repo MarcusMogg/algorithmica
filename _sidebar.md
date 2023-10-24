@@ -51,7 +51,7 @@
 
     - [6.1. 浮点数](006-arithmetic/float.md)
     - [6.2. IEEE 754 浮点数](006-arithmetic/ieee-754.md)
-    - [6.2. Interval Arithmetic](006-arithmetic)
+    - [6.2. 舍入误差](006-arithmetic/errors.md)
     - [6.3. Newton's Method](006-arithmetic)
     - [6.4. Fast Inverse Square Root](006-arithmetic)
     - [6.5. Integers](006-arithmetic)
