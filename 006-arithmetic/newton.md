@@ -1,55 +1,52 @@
----
-title: Newton's Method
-weight: 3
----
 
-Reaching the maximum possible precision is rarely required from a practical algorithm. In real-world data, modeling and measurement errors are usually several orders of magnitude larger than the errors that come from rounding floating-point numbers and such, and we are often perfectly happy with picking an approximate method that trades off precision for speed.
 
-In this section, we introduce one of the most important building blocks in such approximate, numerical algorithms: *Newton's method*.
+实用算法很少需要达到最大可能的精度。在实际数据中，建模和测量误差通常比舍入浮点数等产生的误差大几个数量级，我们通常非常乐意选择一种以精度换取速度的近似方法。
+
+在本节中，我们将介绍这种近似数值算法中最重要之一：牛顿方法。
 
 ## Newton's Method
 
-Newton's method is a simple yet very powerful algorithm for finding approximate roots of real-valued functions, that is, the solutions to the following generic equation:
+牛顿方法是一种简单但非常强大的算法，用于查找实数函数的近似根，即以下通用方程的解：
 
 $$
 f(x) = 0
 $$
 
-The only thing assumed about the function $f$ is that at least one root exists and that $f(x)$ is continuous and differentiable on the search interval. There are also some [boring corner cases](https://en.wikipedia.org/wiki/Newton%27s_method#Failure_analysis), but they almost never occur in practice, so we will just informally say that the function is "good."
+关于 $f$ 的唯一假设是至少存在一个根，并且在搜索间隔上是连续且可微分的。也有许多无聊的[边界情况](https://en.wikipedia.org/wiki/Newton%27s_method#Failure_analysis) ,但在实践中一般不会出现，所以我们可以非正式的说 这个函数是“好的”。
 
-The main idea of the algorithm is to start with some initial approximation $x_0$ and then iteratively improve it by drawing the tangent to the graph of the function at $x = x_i$ and setting the next approximation $x_{i+1}$ equal to the $x$-coordinate of its intersection with the $x$-axis. The intuition is that if the function $f$ is "[good](https://en.wikipedia.org/wiki/Smoothness)" and $x_i$ is already close enough to the root, then $x_{i+1}$ will be even closer.
+该算法的主要思想是从一些初始近似解 $x_0$ 开始，然后通过绘制 $x = x_i$处函数的切线，并设置下一个近似值$x_{i+1}$  等于 x轴于切线的交点。直觉是，如果函数 $f$  是“[好的](https://en.wikipedia.org/wiki/Smoothness)”并且  $x_i$ 已经足够接近根，那么$x_{i+1}$ ​ 就会更加接近。
 
 ![](../img/newton.png)
 
-To obtain the point of intersection for $x_n$, we need to equal its tangent line function to zero:
+
+为了得到  $x_n$的切线交点，我们需要将其切线函数等于零：
 
 $$
 0 = f(x_i) + (x_{i+1} - x_i) f'(x_i)
 $$
 
-from which we derive
 
 $$
 x_{i+1} = x_i - \frac{f(x_i)}{f'(x_i)}
 $$
 
-Newton's method is very important: it is the basis of a wide range of optimization solvers in science and engineering. 
+牛顿方法非常重要：它是科学和工程中各种优化求解器的基础。
 
-### Square Root
+## 平方根
 
-As a simple example, let's derive the algorithm for the problem of finding square roots:
+作为一个简单的例子，让我们推导出计算平方根问题的算法：
 
 $$
 x = \sqrt n \iff x^2 = n \iff f(x) = x^2 - n = 0
 $$
 
-If we substitute $f(x) = x^2 - n$ into the generic formula above, we can obtain the following update rule:
+让我们把 $f(x) = x^2 - n$ 代入上面的公式，可以得到以下的更新规则:
 
 $$
 x_{i+1} = x_i - \frac{x_i^2 - n}{2 x_i} = \frac{x_i + n / x_i}{2}
 $$
 
-In practice we also want to stop it as soon as it is close enough to the right answer, which we can simply check after each iteration:
+在实践中，我们还希望在它足够接近正确答案时立即停止，可以在每次迭代后简单地检查：
 
 ```cpp
 const double EPS = 1e-9;
@@ -62,11 +59,13 @@ double sqrt(double n) {
 }
 ```
 
-The algorithm converges for many functions, although it does so reliably and provably only for a certain subset of them (e.g., convex functions). Another question is how fast the convergence is, if it occurs.
+该算法收敛于许多函数，尽管它仅对其中的某个子集（例如，凸函数）可靠且可证明地收敛。另一个问题是，如果发生收敛，收敛的速度有多快。
 
-### Rate of Convergence
+## 收敛速度
 
 Let's run a few iterations of Newton's method to find the square root of $2$, starting with $x_0 = 1$, and check how many digits it got correct after each iteration:
+
+让我们运行牛顿方法的几次迭代，以找到2 的平方根，从$x_0 = 1$ 开始，并检查每次迭代后正确了多少位：
 
 <pre class='center-pre'>
 <b>1</b>.0000000000000000000000000000000000000000000000000000000000000
@@ -79,38 +78,37 @@ Let's run a few iterations of Newton's method to find the square root of $2$, st
 <b>1.4142135623730950488016887242096980785696718753769480731766796</b>
 </pre>
 
-Looking carefully, we can see that the number of accurate digits approximately doubles on each iteration. This fantastic convergence rate is not a coincidence.
+仔细观察，我们可以看到每次迭代的准确位数大约翻倍。这种惊人的收敛率并非巧合。
 
-To analyze convergence rate quantitatively, we need to consider a small relative error $\delta_i$ on the $i$-th iteration and determine how much smaller the error $\delta_{i+1}$ is on the next iteration:
+为了定量分析收敛率，我们需要考虑第i 次迭代上的一个小相对误差 $\delta_i$ ，并确定下一次迭代时的误差 $\delta_{i+1}$ 小多少：
 
 $$
 |\delta_i| = \frac{|x_n - x|}{x}
 $$
 
-We can express $x_i$ as $x \cdot (1 + \delta_i)$. Plugging it into the Newton iteration formula and dividing both sides by $x$ we get
+可以将 $x_i$ 表示为 $x \cdot (1 + \delta_i)$. 将其代入牛顿迭代，并且两边都除以 $x$ 可以得到：
 
 $$
 1 + \delta_{i+1} = \frac{1}{2} (1 + \delta_i + \frac{1}{1 + \delta_i}) = \frac{1}{2} (1 + \delta_i + 1 - \delta_i + \delta_i^2 + o(\delta_i^2)) = 1 + \frac{\delta_i^2}{2} + o(\delta_i^2)
 $$
 
-Here we have Taylor-expanded $(1 + \delta_i)^{-1}$ at $0$, using the assumption that the error $d_i$ is small (since the sequence converges, $d_i \ll 1$ for sufficiently large $n$).
+在这里我们使用了 $(1 + \delta_i)^{-1}$ 在 $0$ 处的泰勒展开, 假设误差 $d_i$ 很小 (因为序列收敛,  对于一个足够大的 $n$， $d_i \ll 1$).
 
-Rearranging for $\delta_{i+1}$, we obtain
+重新排练 $\delta_{i+1}$, 我们得到
 
 $$
 \delta_{i+1} = \frac{\delta_i^2}{2} + o(\delta_i^2)
 $$
 
-which means that the error roughly squares (and halves) on each iteration once we are close to the solution. Since the logarithm $(- \log_{10} \delta_i)$ is roughly the number of accurate significant digits in the answer $x_i$, squaring the relative error corresponds precisely to doubling the number of significant
-digits that we had observed.
+这意味着一旦我们接近解决方案，误差在每次迭代中大致平方（和减半）。由于对数 $(- \log_{10} \delta_i)$ 致是答案 $x_i$中准确有效位数的位数, 对相对误差进行平方正好对应于我们观察到的有效位数的两倍。
 
-This is known as *quadratic convergence*, and in fact, this is not limited to finding square roots. With detailed proof being left as an exercise to the reader, it can be shown that, in general
+这被称为二次收敛，实际上，这不仅限于寻找平方根。通过详细的证明留给读者作为练习，可以证明，一般来说
 
 $$
 |\delta_{i+1}| = \frac{|f''(x_i)|}{2 \cdot |f'(x_n)|} \cdot \delta_i^2
 $$
 
-which results in at least quadratic convergence under a few additional assumptions, namely $f'(x)$ not being equal to $0$ and $f''(x)$ being continuous.
+这导致在一些附加假设下至少二次收敛，即$f'(x) \ne 0$ 而且$f''(x)$ 连续
 
 ## Further Reading
 
