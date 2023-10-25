@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "006-arithmetic/ieee-754.md",
+                "file": "006-arithmetic/errors.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "006-arithmetic/ieee-754.md",
+                "file": "006-arithmetic/errors.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "006-arithmetic/ieee-754.md",
+                "file": "006-arithmetic/errors.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "006-arithmetic/ieee-754.md"
+                "file": "006-arithmetic/errors.md"
               }
             }
           }
@@ -148,6 +148,7 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "006-arithmetic/ieee-754.md",
     "006-arithmetic/float.md",
     "005-profiling/noise.md",
     "006-arithmetic/README.md",
@@ -165,7 +166,6 @@
     "006-arithmetic/_index.md",
     "006-arithmetic/integer.md",
     "006-arithmetic/newton.md",
-    "006-arithmetic/ieee-754.md",
     "006-arithmetic/img",
     "006-arithmetic/division.md",
     "006-arithmetic/errors.md",
