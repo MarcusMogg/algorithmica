@@ -53,11 +53,9 @@
     - [6.2. IEEE 754 浮点数](006-arithmetic/ieee-754.md)
     - [6.3. 舍入误差](006-arithmetic/errors.md)
     - [6.4. Newton's Method](006-arithmetic/newton.md)
-    - [6.4. 平方根倒数速算法](006-arithmetic/rsqrt.md)
-    - [6.5. Integers](006-arithmetic)
-    - [6.6. Integer Division](006-arithmetic)
-    - [6.7. Bit Manipulation](006-arithmetic)
-    - [6.8. Data Compression)](006-arithmetic)
+    - [6.5. 平方根倒数速算法](006-arithmetic/rsqrt.md)
+    - [6.6. 整数](006-arithmetic/integer.md)
+    - [6.7. 整数除法](006-arithmetic/division.md)
 
 7. Number Theory
  7.1. Modular Inverse

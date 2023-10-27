@@ -1,15 +1,11 @@
----
-title: Integer Numbers
-weight: 5
----
 
-If you are reading this chapter sequentially from the beginning, you might be wondering: why would I introduce integer arithmetic after floating-point one? Isn't it supposed to be easier?
+如果你从头开始按顺序阅读本章，你可能想知道：为什么我要在浮点数之后引入整数算术？不是应该更容易吗？
 
-True: plain integer representations are simpler. But, counterintuitively, their simplicity allows for more possibilities for operations to be expressed in terms of others. And if floating-point representations are so unwieldy that most of their operations are implemented in hardware, efficiently manipulating integers requires much more creative use of the instruction set.
+True：纯整数表示更简单。但是，与直觉相反，它们的简单性允许用其他操作来表达更多的可能性。如果浮点表示是如此笨拙，以至于它们的大部分操作都是在硬件中实现的，那么有效地操作整数需要对指令集进行更具创造性的使用。
 
-## Binary Formats
+## 二进制格式
 
-*Unsigned integers* are just natural numbers written in binary:
+无符号整数只是用二进制写的自然数：
 
 $$
 \begin{aligned}
@@ -19,9 +15,9 @@ $$
 \end{aligned}
 $$
 
-When the result of an operation can't fit into the word size (e.g., is more or equal to $2^{32}$ for 32-bit unsigned integers), it *overflows* by leaving only the lowest 32 bits of the result. Similarly, if the result is a negative value, it *underflows* by adding it to $2^{32}$, so that it always stays in the $[0, 2^{32})$ range.
+当运算的结果无法适应字大小时（例如，大于或等于 32 位无符号整数  $2^{32}$  ），会发生 溢出 *overflows* ，只留下结果的最低 32 位。 类似的，如果结果为负数，结果将增加到  $2^{32}$ ，向下溢出*underflows*。 所以始终保持在  $[0, 2^{32})$ 范围内。
 
-This is equivalent to performing all operations modulo a power of two:
+这相当于以 2 的幂模执行所有操作：
 
 $$
 \begin{aligned}
@@ -31,18 +27,18 @@ $$
 \end{aligned}
 $$
 
-In either case, it raises a special flag which you can check, but usually when people explicitly use unsigned integers, they are expecting this behavior.
+在任何一种情况下，它都会设置一个特殊的标志（寄存器），您可以检查该标志。但通常当人们显式使用无符号整数时，他们期望这种行为（溢出）。
 
-### Signed Integers
+## 有符号整数
 
-*Signed integers* support storing negative values by dedicating the highest bit to represent the sign of the number, in a similar fashion as floating-point numbers do. This halves the range of representable non-negative numbers: the maximum possible 32-bit integer is now $(2^{31}-1)$ and not $(2^{32}-1)$. But the encoding of negative values is not quite the same as for floating-point numbers.
+有符号整数支持存储负值，方法是将最高位专用于表示 数字的符号，其方式与浮点数类似。这使得可表示的非负数的范围减半：最大可能的 32 位整数是$(2^{31}-1)$  而不是 $(2^{32}-1)$. 但是负值的编码与浮点数的编码并不完全相同。
 
-Computer engineers are even lazier than programmers — and this is not only motivated by the instinctive desire for simplification, but also by saving transistor space. This can be achieved by reusing circuitry that you already have for other operations, which is what they aimed for when designing the signed integer format:
+计算机工程师甚至比程序员更懒惰——这不仅是出于对简化的本能渴望，也是为了节省晶体管空间。这可以通过重用已经用于其他操作的电路来实现，这就是他们在设计有符号整数格式时的目标：
 
-- For an $n$-bit signed integer type, the encodings of all numbers in the $[0, 2^{n-1})$ range remain the same as their unsigned binary representations.
-- All numbers in the $[-2^{n-1}, 0)$ range are encoded sequentially right after the "positive" range — that is, starting with $(-2^{n - 1})$ that has code $(2^{n-1})$ and ending with $(-1)$ that has code $(2^n - 1)$.
+- 对于 n-bit 有符号整数类型， $[0, 2^{n-1})$  范围内所有数字的编码与其无符号二进制表示形式相同。
+- $[-2^{n-1}, 0)$ 范围内的所有数字都紧跟在“正”范围之后按顺序编码。即， 起始值 $(-2^{n - 1})$  编码等于 $(2^{n-1})$，结束于 $(-1)$编码等于 $(2^{n} -1)$
 
-One way to look at this is that all negative numbers are just encoded as if they were subtracted from $2^n$ — an operation known as *two's complement*:
+看待这个问题的一种方法是，所有负数都被编码，就好像它们从$2^n$  减去一样  —— 这种操作称为 2 的补码：
 
 $$
 \begin{aligned}
@@ -51,55 +47,58 @@ $$
 \end{aligned}
 $$
 
-Here $\bar{x}$ represents bitwise negation, which can be also thought of as subtracting $x$ from $(2^n - 1)$.
+这里 $\bar{x}$ 表示按位否, 也可以认为是 $(2^n - 1) - x$.
 
-As an exercise, here are some facts about signed integers:
+作为练习，以下是有关有符号整数的一些事实：
 
-- All positive numbers and zero remain the same as their binary notation.
-- All negative numbers have the highest bit set to one.
-- There are more negative numbers than positive numbers (exactly by one — because of zero).
-- For `int`, if you add $1$ to $(2^{31}-1)$, the result will be $-2^{31}$, represented as `10000000` (for exposition purposes, we will only write 8 bits instead of 32).
-- Knowing a binary notation of a positive number `x`, you can get the binary notation of `-x` as `~x + 1`.
-- `-1` is represented as `~1 + 1 = 11111110 + 00000001 = 11111111`.
-- `-42` is represented as `~42 + 1 = 11010101 + 00000001 = 11010110`.
-- The number `-1 = 11111111` is followed by `0 = -1 + 1 = 11111111 + 00000001 = 00000000`.
+- 所有正数和零与其二进制表示法相同。
+- 所有负数最高位都为0.
+- 可表示的负数比正数多一个，因为0.
+- 对于 `int`,  $(2^{31}-1) + 1$, 结果为 $-2^{31}$, 表示为 `10000000` (出于说明目的，我们只写8位而不是32位).
+- 对于正数 `x`, 你可以使用 `~x + 1`得到 `-x` 的表示.
+- `-1` 可以表示为 `~1 + 1 = 11111110 + 00000001 = 11111111`.
+- `-42` 可以表示为 `~42 + 1 = 11010101 + 00000001 = 11010110`.
+-  `-1 = 11111111` 后跟 `0 = -1 + 1 = 11111111 + 00000001 = 00000000`.
 
-The main advantage of this encoding is that you don't have to do anything to convert unsigned integers to signed ones (except maybe check for overflow), and you can reuse the same circuitry for most operations, possibly only flipping the sign bit for comparisons and such.
 
-That said, you need to be careful with signed integer overflows. Even though they almost always overflow the same way as unsigned integers, programming languages usually consider the possibility of overflow as undefined behavior. If you need to overflow integer variables, convert them to unsigned integers: it's free anyway.
+这种编码的主要优点是，您无需执行任何操作即可将无符号整数转换为有符号整数（除了检查溢出），并且您可以在大多数操作中重复使用相同的电路，可能只需要翻转符号位进行比较。
 
-**Exercise.** What is the only integer value for which `std::abs` produces a wrong result? What will this result be?
 
-### Integer Types
+也就是说，需要小心有符号整数溢出。尽管它们几乎总是以与无符号整数相同的方式溢出，但编程语言通常将溢出的可能性视为未定义的行为。如果您需要溢出整数变量，请将它们转换为无符号整数：无论如何它都是免费的。
 
-Integers come in different sizes, but all function roughly the same.
+**Exercise.** What is the only integer value for which `std::abs` produces a wrong result? What will this result be?  $-2^{31}$
+
+## Integer Types
+
+整数有不同的大小，但功能大致相同。
 
 | Bits | Bytes | Signed C type        | Unsigned C type      | Assembly |
 |-----:|-------|----------------------|----------------------|----------|
-|    8 | 1     | `signed char`[^char] | `unsigned char`      | `byte`   |
+|    8 | 1     | `signed char`| `unsigned char`      | `byte`   |
 |   16 | 2     | `short`              | `unsigned short`     | `word`   |
 |   32 | 4     | `int`                | `unsigned int`       | `dword`  |
 |   64 | 8     | `long long`          | `unsigned long long` | `qword`  |
 
-[^char]: Note that `char`, `unsigned char`, and `signed char` are technically three distinct types. The C standard leaves it up to the implementation whether the plain `char` is signed or unsigned (on most compilers, it is signed).
 
-The bits of an integer are simply stored sequentially. The only ambiguity here is the order in which to store them — left to right or right to left — called *endianness*. Depending on the architecture, the format can be either:
 
-- *Little-endian*, which lists *lower* bits first. For example, $42_{10}$ will be stored as $010101$.
-- *Big-endian*, which lists *higher* bits first. All previous examples in this article follow it.
+整数的位只是按顺序存储。这里唯一的歧义是存储它们的顺序 - 从左到右或从右到左 - 称为字节序。根据体系结构，格式可以是：
 
-This seems like an important architecture aspect, but in most cases, it doesn't make a difference: just pick one style and stick with it. But in some cases it does:
+- 小端序，首先列出较低的位。
+- 大端序，首先列出更高的位。本文前面的所有示例都遵循它。
 
-- Little-endian has the advantage that you can cast a value to a smaller type (e.g., `long long` to `int`) by just loading fewer bytes, which in most cases means doing nothing — thanks to *register aliasing*, `eax` refers to the first 4 bytes of `rax`, so conversion is essentially free. It is also easier to read values in a variety of type sizes — while on big-endian architectures, loading an `int` from a `long long` array would require shifting the pointer by 2 bytes.
-- Big-endian has the advantage that higher bytes are loaded first, which in theory can make highest-to-lowest routines such as comparisons and printing faster. You can also perform certain checks such as finding out whether a number is negative by only loading its first byte.
 
-Big-endian is also more "natural" — this is how we write binary numbers on paper — but the advantage of having faster type conversions outweights it. For this reason, little-endian is used by default on most hardware, although some CPUs are "bi-endian" and can be configured to switch modes on demand.
+这似乎是一个重要的架构方面，但在大多数情况下，它并没有区别：只需选择一种风格并坚持下去。但在某些情况下，它确实有影响：
 
-### 128-bit Integers
+- 小端的优点是 可以通过加载更少的字节将值转换为较小的类型(e.g., `long long` to `int`), 这在大多数情况下意味着什么都不做 — 由于寄存器别名，, `eax` 指向 `rax`的前4个字节, 因此转换基本上是免费的. 读取各种类型大小的值也更容易 — 在大端结构上, 从 `long long` 数组 读一个int 需要 指针移动2字节.
+- 大端序的优点是先加载较高的字节，理论上可以使比较和打印等从高到低的例程更快。您还可以执行某些检查，例如仅通过加载数字的第一个字节来确定数字是否为负数。 还有网络传输，可以先读高bit
 
-Sometimes we need to multiply two 64-bit integers to get a 128-bit integer — usually to serve as a temporary value and be reduced modulo a 64-bit integer right away.
+大端序也更“自然”——这就是我们在纸上写二进制数的方式——但更快的类型转换的优势超过了它。出于这个原因，大多数硬件默认使用小端序，尽管某些 CPU 是“双端”并且可以配置为按需切换模式。
 
-There are no 128-bit registers to hold the result of such multiplication, so the `mul` instruction, in addition to the normal `mul r r` form where it multiplies the values in registers and keeps the lower half of the result, has another `mul r` mode, where it multiplies whatever is stored in the `rax` register by its operand, and writes the result into two registers — the lower 64 bits of the result will go into `rax`, and the higher 64 bits go into `rdx`:
+## 128-bit Integers
+
+有时我们需要将两个 64 位整数相乘得到一个 128 位整数——通常用作临时值并立即将模化为 64 位整数。
+
+没有 128 位寄存器来保存这种乘法的结果，因此 `mul` 指令除了将寄存器中的值相乘并保留结果的下半部分的正常 `mul r r` 形式外，还有另一种 `mul r` 模式，它将 `rax` 寄存器中存储的任何内容乘以其操作数，并将结果写入两个寄存器 — 结果的较低 64 位将进入 `rax` ， 较高的 64 位进入 `rdx` ：
 
 ```nasm
 ; input: 64-bit integers a and b, stored in rsi and rdi
@@ -109,15 +108,14 @@ mov     r8, rdx
 imul    rsi
 ```
 
-Some compilers have a separate type supporting this operation. In GCC and Clang it is available as `__int128`:
-
+某些编译器具有支持此操作的单独类型。在GCC和Clang中，可用： `__int128`
 ```cpp
 void prod(int64_t a, int64_t b, __int128 *c) {
     *c = a * (__int128) b;
 }
 ```
 
-Its typical use case is to immediately extract either the lower or the higher part of the multiplication and forget about it:
+它的典型用例是立即提取乘法的较低或较高部分并忽略它：
 
 ```c++
 __int128_t x = 1;
@@ -125,7 +123,7 @@ int64_t hi = x >> 64;
 int64_t lo = (int64_t) x; // will be just truncated
 ```
 
-For all purposes other than multiplication, 128-bit integers are just bundled as two registers. This makes it too weird to have a full-fledged 128-bit type, so the support for it is limited, other than for basic arithmetic operations. For example:
+对于乘法以外，128 位整数只是捆绑为两个寄存器。这使得拥有成熟的 128 位类型太奇怪了，因此除了基本的算术运算之外，对它的支持是有限的。例如：
 
 ```c++
 __int128_t add(__int128_t a, __int128_t b) {
@@ -133,7 +131,7 @@ __int128_t add(__int128_t a, __int128_t b) {
 }
 ```
 
-is compiled into:
+编译成：
 
 ```nasm
 add:
@@ -144,4 +142,4 @@ add:
     ret
 ```
 
-Other platforms provide similar mechanisms for dealing with longer-than-word multiplication. For example, Arm has `mulhi` and `mullo` instructions, returning lower and higher parts of the multiplication, and x86 [SIMD extensions](/hpc/simd) have similar 32-bit instructions.
+其他平台提供了类似的机制来处理长于word的乘法。例如，Arm 具有 `mullo` 指令，返回乘法的较低和较高部分，x86 SIMD 扩展具有 `mulhi` 类似的 32 位指令。

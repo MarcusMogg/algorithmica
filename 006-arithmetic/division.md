@@ -1,25 +1,25 @@
----
-title: Integer Division
-weight: 6
----
 
-Compared to other arithmetic operations, division works very poorly on x86 and computers in general. Both floating-point and integer division is notoriously hard to implement in hardware. The circuitry takes a lot of space in the ALU, the computation has a lot of stages, and as the result, `div` and its siblings routinely take 10-20 cycles to complete, with latency being slightly less on smaller data type sizes.
 
-### Division and Modulo in x86
+与其他算术运算相比，除法在 x86 和一般计算机上的效果非常差。众所周知，浮点和整数除法在硬件中都很难实现。该电路在ALU中占用大量空间，计算有很多阶段，因此，`div` 和其兄弟姐妹通常需要10-20个周期才能完成， 在较小的数据类型大延迟略低。
 
-Since nobody wants to duplicate all this mess for a separate modulo operation, the `div` instruction serves both purposes. To perform a 32-bit integer division, you need to put the dividend *specifically* in the `eax` register and call `div` with the divisor as its sole operand. After this, the quotient will be stored in `eax` and the remainder will be stored in `edx`.
+## x86 中的除法和取模
+
+
+由于没有人愿意为单独的模运算复制所有这些复杂操作， `div` 指令可以达到同时这两个目的。要执行 32 位整数除法，需要将被除数专门放入 `eax` 寄存器中，并使用除数作为唯一操作数调用 `div`。商将存储在`eax` ，余数将存储在`edx`中
 
 The only caveat is that the dividend actually needs to be stored in *two* registers, `eax` and `edx`: this mechanism enables 64-by-32 or even 128-by-64 division, similar to how [128-bit multiplication](../integer) works. When performing the usual 32-by-32 signed division, we need to sign-extend `eax` to 64 bits and store its higher part in `edx`:
+
+唯一需要注意的是，除法实际上需要存储在两个寄存器中，`eax` `edx` ：这种机制支持64-32甚至128-64的除法， 类似于128位乘法的工作方式。在执行通常的 32 - 32 有符号除法时，我们需要将`eax` 符号扩展到 64 位并将其较高部分存储在 `edx` ：
 
 ```nasm
 div(int, int):
     mov  eax, edi
-    cdq
+    cdq  // 把EAX 的第32 bit 复制到EDX 的每一个bit 上
     idiv esi
     ret
 ```
 
-For unsigned division, you can just set `edx` to zero so that it doesn't interfere:
+对于无符号除法，您可以设置为 `edx` 零，这样它就不会干扰：
 
 ```nasm
 div(unsigned, unsigned):
@@ -29,8 +29,7 @@ div(unsigned, unsigned):
     ret
 ```
 
-An in both cases, in addition to the quotient in `eax`, you can also access the remainder as `edx`:
-
+在这两种情况下，除了`eax`  中的 商之外，您还可以访问余数 `edx` ：
 ```nasm
 mod(unsigned, unsigned):
     mov  eax, edi
@@ -40,7 +39,7 @@ mod(unsigned, unsigned):
     ret
 ```
 
-You can also divide 128-bit integer (stored in `rdx:rax`) by a 64-bit integer:
+您还可以将 128 位整数（存储在`rdx:rax` 中 ）除以 64 位整数：
 
 ```nasm
 div(u128, u64):
@@ -52,33 +51,31 @@ div(u128, u64):
     ret
 ```
 
-The high part of the dividend should be less than the divisor, otherwise an overflow occurs. Because of this constraint, it is [hard](https://danlark.org/2020/06/14/128-bit-division/) to get compilers to produce this code by themselves: if you divide a [128-bit integer type](../integer) by a 64-bit integer, the compiler will bubble-wrap it with additional checks which may actually be unnecessary.
 
-### Division by Constants
+被除数 的高部分应小于除数，否则会发生溢出。由于此约束，[很难](https://danlark.org/2020/06/14/128-bit-division/)让编译器自己生成此代码：如果将 128 位整数类型除以 64 位整数，编译器将通过其他检查将其气泡包装，这实际上可能是不必要的。
 
-Integer division is painfully slow, even when fully implemented in hardware, but it can be avoided in certain cases if the divisor is constant. A well-known example is the division by a power of two, which can be replaced by a one-cycle binary shift: the [binary GCD algorithm](/hpc/algorithms/gcd) is a delightful showcase of this technique.
+## 除常量
 
-In the general case, there are several clever tricks that replace division with multiplication at the cost of a bit of precomputation. All these tricks are based on the following idea. Consider the task of dividing one floating-point number $x$ by another floating-point number $y$, when $y$ is known in advance. What we can do is to calculate a constant
+即使在硬件中完全实现，整数除法也非常慢，但在某些情况下，如果除数是恒定的，则可以避免。一个众所周知的例子是除以 2 的幂，可以用一个二进制移位代替
+
+在一般情况下，有几个聪明的技巧可以用乘法代替除法，代价是一些预计算。所有这些技巧都基于以下想法。考虑将一个浮点数除以另一个浮点数 的任务，当事先知道y时，我们能做的是计算一个常数
 
 $$
 d \approx y^{-1}
 $$
 
-and then, during runtime, we will calculate
+然后，在运行时，我们将计算
 
 $$
 x / y = x \cdot y^{-1} \approx x \cdot d
 $$
 
-The result of $\frac{1}{y}$ will be at most $\epsilon$ off, and the multiplication $x \cdot d$ will only add another $\epsilon$ and therefore will be at most $2 \epsilon + \epsilon^2 = O(\epsilon)$ off, which is tolerable for the floating-point case.
+ $\frac{1}{y}$ 的结果误差最多为 $\epsilon$ , 乘法 $x \cdot d$ 只会添加另一个 $\epsilon$ ，因此误差最多 $2 \epsilon + \epsilon^2 = O(\epsilon)$ , 这对于浮点情况是可以容忍的。.
 
-<!--
-For example, `double` has 53 mantissa bits and therefore a machine epsilon of $\frac{1}{53}$, , if we also make sure it is rounded the right way.
--->
 
 ### Barrett Reduction
 
-How to generalize this trick for integers? Calculating `int d = 1 / y` doesn't seem to work, because it will just be zero. The best thing we can do is to express it as
+如何为整数推广这个技巧？计算`int d = 1 / y` 不起作用，因为结果为0. 我们能做的最好的事情就是将其表达为
 
 $$
 d = \frac{m}{2^s}
