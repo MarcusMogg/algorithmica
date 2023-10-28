@@ -7,8 +7,6 @@
 
 由于没有人愿意为单独的模运算复制所有这些复杂操作， `div` 指令可以达到同时这两个目的。要执行 32 位整数除法，需要将被除数专门放入 `eax` 寄存器中，并使用除数作为唯一操作数调用 `div`。商将存储在`eax` ，余数将存储在`edx`中
 
-The only caveat is that the dividend actually needs to be stored in *two* registers, `eax` and `edx`: this mechanism enables 64-by-32 or even 128-by-64 division, similar to how [128-bit multiplication](../integer) works. When performing the usual 32-by-32 signed division, we need to sign-extend `eax` to 64 bits and store its higher part in `edx`:
-
 唯一需要注意的是，除法实际上需要存储在两个寄存器中，`eax` `edx` ：这种机制支持64-32甚至128-64的除法， 类似于128位乘法的工作方式。在执行通常的 32 - 32 有符号除法时，我们需要将`eax` 符号扩展到 64 位并将其较高部分存储在 `edx` ：
 
 ```nasm
