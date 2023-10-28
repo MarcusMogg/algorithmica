@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "006-arithmetic/division.md",
+                "file": "004-compilation/contracts.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "006-arithmetic/division.md",
+                "file": "004-compilation/contracts.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "006-arithmetic/division.md",
+                "file": "004-compilation/contracts.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "006-arithmetic/division.md"
+                "file": "004-compilation/contracts.md"
               }
             }
           }
@@ -148,8 +148,16 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
-    "006-arithmetic/compression.md",
+    "004-compilation/arithmetic.md",
+    "004-compilation/abstractions.md",
+    "004-compilation/contracts.md",
+    "002-architecture/assembly.md",
+    "002-architecture/functions.md",
+    "002-architecture/indirect.md",
+    "002-architecture/interaction.md",
+    "002-architecture/isa.md",
     "006-arithmetic/division.md",
+    "006-arithmetic/compression.md",
     "006-arithmetic/errors.md",
     "006-arithmetic/float.md",
     "006-arithmetic/rsqrt.md",
@@ -179,14 +187,6 @@
     "005-profiling/events.md",
     "005-profiling/benchmarking.md",
     "005-profiling",
-    "004-compilation/stages.md",
-    "004-compilation/situational.md",
-    "004-compilation/README.md",
-    "004-compilation/precalc.md",
-    "004-compilation/limitations.md",
-    "004-compilation/flags.md",
-    "004-compilation/contracts.md",
-    "004-compilation/arithmetic.md",
     "004-compilation",
     "003-pipelining/img",
     "003-pipelining",
