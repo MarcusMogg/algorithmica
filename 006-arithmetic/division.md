@@ -174,7 +174,7 @@ $$
 - 要得到小数部分 (⅚), 我们可以只取点后面的内容
 - 为了得到余数 (5) ,我们可以将小数部分乘以除数.
 
-Now, for 32-bit integers, we can set $s = 64$ and look at the computation that we do in the multiply-and-shift scheme:
+现在，对于 32 位整数，我们可以设置 $s = 64$并查看在乘移方案中所做的计算:
 
 $$
   \lfloor x / y \rfloor
@@ -182,15 +182,15 @@ $$
 = \Bigl \lfloor \frac{x \cdot \lceil  2^s /y \rceil}{2^s} \Bigr \rfloor
 $$
 
-What we really do here is we multiply $x$ by a floating-point constant ($x \cdot m$) and then truncate the result $(\lfloor \frac{\cdot}{2^s} \rfloor)$.
+我们在这里真正要做的是x乘以浮点常数 ($x \cdot m$) 然后截断结果 $(\lfloor \frac{\cdot}{2^s} \rfloor)$.
 
-What if we took not the highest bits but the lowest? This would correspond to the fractional part — and if we multiply it back by $y$ and truncate the result, this will be exactly the remainder:
+如果我们不取最高的位，而是取最低的位呢？这将对应于小数部分——如果我们将其乘以 $y$并截断结果，这将恰好是余数：
 
 $$
 r = \Bigl \lfloor \frac{ (x \cdot \lceil  2^s /y \rceil \bmod 2^s) \cdot y }{2^s} \Bigr \rfloor
 $$
 
-This works perfectly because what we do here can be interpreted as just three chained floating-point multiplications with the total relative error of $O(\epsilon)$. Since $\epsilon = O(\frac{1}{2^s})$ and $s = 2n$, the error will always be less than one, and hence the result will be exact.
+T这很有效，因为我们在这里所做的可以解释为只有三个链式浮点乘法，总相对误差为 $O(\epsilon)$. 由于 $\epsilon = O(\frac{1}{2^s})$ and $s = 2n$, 误差将始终小于 1，因此结果将是准确的
 
 ```c++
 uint32_t y;
@@ -207,7 +207,7 @@ uint32_t div(uint32_t x) {
 }
 ```
 
-We can also check divisibility of $x$ by $y$ with just one multiplication using the fact that the remainder of division is zero if and only if the fractional part (the lower 64 bits of $m \cdot x$) does not exceed $m$ (otherwise, it would become a nonzero number when multiplied back by $y$ and right-shifted by 64).
+我们还可以使用除法的余数为零这一事实来检查 $x$ / $y$ 能否整除。 当且仅当小数部分 (  $m \cdot x$ 的低64位) 不超过 $m$ (否则，当乘以 y 并右移 64 时，它将变成非零数).
 
 ```c++
 bool is_divisible(uint32_t x) {
@@ -215,9 +215,8 @@ bool is_divisible(uint32_t x) {
 }
 ```
 
-The only downside of this method is that it needs integer types four times the original size to perform the multiplication, while other reduction methods can work with just the double.
-
-There is also a way to compute 64x64 modulo by carefully manipulating the halves of intermediate results; the implementation is left as an exercise to the reader.
+这种方法的唯一缺点是它需要四倍于原始大小的整数类型来执行乘法运算，而其他约简方法只能使用双精度。
+还有一种方法可以通过仔细处理中间结果的两半来计算 64x64 模;实现作为练习留给读者。
 
 ### Further Reading
 
