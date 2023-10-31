@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "006-arithmetic/division.md",
+                "file": "006-arithmetic/integer.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "006-arithmetic/division.md",
+                "file": "006-arithmetic/integer.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "006-arithmetic/division.md",
+                "file": "006-arithmetic/integer.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "006-arithmetic/division.md"
+                "file": "006-arithmetic/integer.md"
               }
             }
           }
@@ -148,6 +148,11 @@
   },
   "active": "18a1f201f0f8bfc3",
   "lastOpenFiles": [
+    "006-arithmetic/errors.md",
+    "006-arithmetic/division.md",
+    "006-arithmetic/compression.md",
+    "006-arithmetic/bit-hacks.md",
+    "006-arithmetic/integer.md",
     "004-compilation/contracts.md",
     "004-compilation/arithmetic.md",
     "004-compilation/abstractions.md",
@@ -156,9 +161,6 @@
     "002-architecture/indirect.md",
     "002-architecture/interaction.md",
     "002-architecture/isa.md",
-    "006-arithmetic/division.md",
-    "006-arithmetic/compression.md",
-    "006-arithmetic/errors.md",
     "006-arithmetic/float.md",
     "006-arithmetic/rsqrt.md",
     "006-arithmetic/newton.md",
@@ -173,11 +175,9 @@
     "006-arithmetic/img/float.svg",
     "006-arithmetic/img/complex-plane.png",
     "006-arithmetic/img/complex-circle.png",
-    "006-arithmetic/integer.md",
     "006-arithmetic/README.md",
     "006-arithmetic/img",
     "006-arithmetic/ieee-754.md",
-    "006-arithmetic/bit-hacks.md",
     "006-arithmetic",
     "005-profiling/simulation.md",
     "005-profiling/README.md",
