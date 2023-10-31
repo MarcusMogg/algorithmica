@@ -57,26 +57,29 @@
     - [6.6. 整数](006-arithmetic/integer.md)
     - [6.7. 整数除法](006-arithmetic/division.md)
 
-7. Number Theory
- 7.1. Modular Inverse
- 7.2. Montgomery Multiplication
-(7.3. Finite Fields)
-(7.4. Error Correction)
- 7.5. Cryptography
- 7.6. Hashing
- 7.7. Random Number Generation
-8. External Memory
- 8.1. Memory Hierarchy
- 8.2. Virtual Memory
- 8.3. External Memory Model
- 8.4. External Sorting
- 8.5. List Ranking
- 8.6. Eviction Policies
- 8.7. Cache-Oblivious Algorithms
- 8.8. Spacial and Temporal Locality
-(8.9. B-Trees)
-(8.10. Sublinear Algorithms)
-(9.13. Memory Management)
+- [7. Number Theory](007-number-theory)
+    - [7.1. Modular Inverse](007-number-theory)
+    - [7.2. Montgomery Multiplication](007-number-theory)
+    - [(7.3. Finite Fields)](007-number-theory)
+    - [(7.4. Error Correction)](007-number-theory)
+    - [7.5. Cryptography](007-number-theory)
+    - [7.6. Hashing](007-number-theory)
+    - [7.7. Random Number Generation](007-number-theory)
+
+- [8. External Memory](008-external-memory)
+
+    -[8.1. Memory Hierarchy](008-external-memory)
+    -[8.2. Virtual Memory](008-external-memory)
+    -[8.3. External Memory Model](008-external-memory)
+    -[8.4. External Sorting](008-external-memory)
+    -[8.5. List Ranking](008-external-memory)
+    -[8.6. Eviction Policies](008-external-memory)
+    -[8.7. Cache-Oblivious Algorithms](008-external-memory)
+    -[8.8. Spacial and Temporal Locality](008-external-memory)
+    -[(8.9. B-Trees)](008-external-memory)
+    -[(8.10. Sublinear Algorithms)](008-external-memory)
+    -[(9.13. Memory Management)](008-external-memory)
+
 9. RAM & CPU Caches
  9.1. Memory Bandwidth
  9.2. Memory Latency
