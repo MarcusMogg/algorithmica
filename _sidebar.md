@@ -68,17 +68,17 @@
 
 - [8. External Memory](008-external-memory)
 
-    -[8.1. Memory Hierarchy](008-external-memory)
-    -[8.2. Virtual Memory](008-external-memory)
-    -[8.3. External Memory Model](008-external-memory)
-    -[8.4. External Sorting](008-external-memory)
-    -[8.5. List Ranking](008-external-memory)
-    -[8.6. Eviction Policies](008-external-memory)
-    -[8.7. Cache-Oblivious Algorithms](008-external-memory)
-    -[8.8. Spacial and Temporal Locality](008-external-memory)
-    -[(8.9. B-Trees)](008-external-memory)
-    -[(8.10. Sublinear Algorithms)](008-external-memory)
-    -[(9.13. Memory Management)](008-external-memory)
+    - [8.1. Memory Hierarchy](008-external-memory)
+    - [8.2. Virtual Memory](008-external-memory)
+    - [8.3. External Memory Model](008-external-memory)
+    - [8.4. External Sorting](008-external-memory)
+    - [8.5. List Ranking](008-external-memory)
+    - [8.6. Eviction Policies](008-external-memory)
+    - [8.7. Cache-Oblivious Algorithms](008-external-memory)
+    - [8.8. Spacial and Temporal Locality](008-external-memory)
+    - [(8.9. B-Trees)](008-external-memory)
+    - [(8.10. Sublinear Algorithms)](008-external-memory)
+    - [(9.13. Memory Management)](008-external-memory)
 
 9. RAM & CPU Caches
  9.1. Memory Bandwidth
