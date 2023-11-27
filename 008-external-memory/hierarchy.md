@@ -1,23 +1,19 @@
----
-title: Memory Hierarchy
-weight: 1
----
 
-Modern computer memory is highly hierarchical. It consists of multiple *cache layers* of varying speed and size, where *higher* levels typically store most frequently accessed data from *lower* levels to reduce latency: each next level is usually an order of magnitude faster, but also smaller and/or more expensive.
+现代计算机内存是高度分层的，包含多个不同大小、速度的缓存层级，其中较高级别通常存储来自最常访问的低级别数据以减少延迟：下一个级别通常快一个数量级，但也更小和/或更昂贵。
 
 ![](../img/hierarchy.png)
 
-Abstractly, various memory devices can be described as modules that have a certain storage capacity $M$ and can read or write data in blocks of $B$ (not individual bytes!), taking a fixed time to complete.
+抽象地说，各种存储设备可以描述为具有一定存储容量 M 的模块，并且可以以 块 B （不是单个字节！）的形式读取或写入数据，需要固定的时间完成。
 
-From this perspective, each type of memory has a few important characteristics:
+从这个角度来看，每种类型的内存都有几个重要特征：
 
-- *total size* $M$;
-- *block size* $B$; 
-- *latency*, that is, how much time it takes to fetch one byte;
-- *bandwidth*, which may be higher than just the block size times latency, meaning that I/O operations can "overlap";
-- *cost* in the amortized sense, including the price for the chip, its energy requirements, maintenance, and so on.
+- *total size* 总大小 $M$;
+- *block size* 块大小 $B$; 
+- *latency*, 延迟，即获取一个字节所需的时间;;
+- *bandwidth*, 带宽，可能高于块大小乘以延迟，这意味着 I/O 操作可以“重叠”"overlap";
+- *cost* 摊销意义上的成本，包括芯片的价格、能源需求、维护等.
 
-Here is an approximate comparison table for commodity hardware in 2021:
+以下是 2021 年商用硬件的大致比较表：
 
 | Type | $M$      | $B$ | Latency | Bandwidth | $/GB/mo[^pricing] |
 |:-----|:---------|-----|---------|-----------|:------------------|
@@ -29,45 +25,33 @@ Here is an approximate comparison table for commodity hardware in 2021:
 | HDD  | TBs      | -   | 10ms    | 1G/s      | 0.04              |
 | S3   | $\infty$ | -   | 150ms   | $\infty$  | 0.02[^S3]         |
 
-In reality, there are many specifics about each type of memory, which we will now go through.
+实际上，每种类型的内存都有许多细节，我们现在将介绍这些细节。
 
-[^pricing]: Pricing information is taken from the [Google Cloud Platform](https://cloud.google.com/products/calculator?skip_cache=true).
-[^S3]: Cloud storage typically has [multiple tiers](https://aws.amazon.com/s3/storage-classes/), becoming progressively cheaper if you access the data less frequently.
+## Volatile Memory 易失性内存
 
-### Volatile Memory
 
-Everything up to the RAM level is called *volatile memory* because it does not persist data in case of a power shortage and other disasters. It is fast, which is why it is used to store temporary data while the computer is powered.
+RAM级别的所有内容被成为 易失性内存，因为在电量不足或者其他灾难情况下不会保存数据。ta很快，因此用来在计算机通电的情况下存储临时数据。
 
-From fastest to slowest:
+由快到慢:
 
-- **CPU registers**, which are the zero-time access data cells CPU uses to store all its intermediate values, can also be thought of as a memory type. There is only a limited number of them (e.g., just 16 "general purpose" ones), and in some cases, you may want to use all of them for performance reasons.
-- **CPU caches.** Modern CPUs have multiple layers of cache (L1, L2, often L3, and rarely even L4). The lowest layer is shared between cores and is usually scaled with their number (e.g., a 10-core CPU should have around 10M of L3 cache).
-- **Random access memory,** which is the first scalable type of memory: nowadays you can rent machines with half a terabyte of RAM on the public clouds. This is the one where most of your working data is supposed to be stored.
+- **CPU registers**, CPU用于存储立即数的 零成本访问数据单元，也可以认为是一种内存. 有数量限制 (e.g.,只有 16个 "通用寄存器" ), 在某些情况下，处于性能原因，你可能希望使用所有的寄存器.
+- **CPU caches.** 现代CPU通常有多级缓存 (L1, L2, often L3, and rarely even L4). 最低级别在核心之间共享，通常根据核心数量变化 (e.g., 10核 CPU应该有10M  L3 cache).
+- **Random access memory,** 第一种可拓展的内存类型:如今你可以在公有云上租赁TB级别 RAM 机器.这是应该存储大多数工作数据的地方。
 
-The CPU cache system has an important concept of a *cache line*, which is the basic unit of data transfer between the CPU and the RAM. The size of a cache line is 64 bytes on most architectures, meaning that all main memory is divided into blocks of 64 bytes, and whenever you request (read or write) a single byte, you are also fetching all its 63 cache line neighbors whether your want them or not.
+CPU 缓存系统有一个重要的概念叫做 缓存行*cache line*， 它是CPU和RAM之间的级别数据传输单元。 缓存行的大小通常是 64byte，这意味着所有主内存都被划分为 64 字节的块，每当请求（读取或写入）单个字节时，也会获取其所有 63 个缓存行邻居，无论你是否愿意。
 
-Caching on the CPU level happens automatically based on the last access times of cache lines. When accessed, the contents of a cache line are emplaced onto the lowest cache layer and then gradually evicted to higher levels unless accessed again in time. The programmer can't control this process explicitly, but it is worthwhile to study how it works in detail, which we will do [in the next chapter](/hpc/cpu-cache).
+CPU 级别的缓存会根据缓存行的上次访问时间自动进行。访问时，缓存行的内容将放置在最低的缓存层上，然后逐渐逐出，除非及时再次访问。程序员无法明确地控制这个过程，但值得详细研究它是如何工作的，我们将在下一章中介绍。
+## 非易失性存储器
 
-<!--
+虽然 CPU 缓存中的数据单元和 RAM 中的数据单元只存储几个电子（这些电子会定期泄漏并需要定期刷新），但非易失性存储器类型的数据单元存储数百个电子。这使得数据可以在没有电源的情况下长时间保留，但代价是性能和耐用性——因为当你有更多的电子时，你也有更多的机会让它们与硅原子碰撞。
 
-Caching is done not with a separate chip, but is embedded in the CPU itself. There are also multi-socket systems that support installing multiple CPUs in the motherboard. In this case, they have separate caching systems, and more over, each socket often becomes *local* to a certain part of the main memory and thus has increased latency (~100ns) for accessing locations outside of it. Such architectures are called NUMA ("Non-Uniform Memory Access") and used as a way to increase the total amount of RAM. We will not consider them for now, but they will become important in the context of parallel computing.
 
-There are other caches inside CPUs that are used for something other than data. Instructions are fetched from memory roughly the same way that the data is fetched, so it is important not to wait for the instructions to load. For this reason, CPUs also have *instruction cache*, which, as the name suggests, is used for caching instructions that are read from the main memory. Its size and performance are about the same as for the L1 cache, and since it is not large, it makes sense to make binaries small in size so that the CPU does not "starve" from not being to fetch instructions in time.
+有很多方法可以以持久的方式存储数据，但从程序员的角度来看，这些是主要的：
 
--->
+- **Solid state drives.** 固态硬盘 These have relatively low latency on the order of 0.1ms ($10^5$ ns), but they also have a high cost, amplified by the fact that they have limited lifespans as each cell can only be written to a limited number of times. This is what mobile devices and most laptops use because they are compact and have no moving parts.
+- **Hard disk drives** 硬盘驱动器 are unusual because they are actually [rotating physical disks](https://www.youtube.com/watch?v=3owqvmMf6No&feature=emb_title) with a read/write head attached to them. To read a memory location, you need to wait until the disk rotates to the right position and then very precisely move the head to it. This results in some very weird access patterns where reading one byte randomly may take the same time as reading the next 1MB of data — which is usually on the order of milliseconds. Since this is the only part of a computer, except for the cooling system, that has mechanically moving parts, hard disks break quite often (with the average lifespan of ~3 years for a data center HDD).
+- **Network-attached storage**,网络连接存储 which is the practice of using other networked devices to store data on them. There are two distinctive types. The first one is the Network File System (NFS), which is a protocol for mounting the file system of another computer over the network. The other is API-based distributed storage systems, most famously [Amazon S3](https://aws.amazon.com/s3/), that are backed by a fleet of storage-optimized machines of a public cloud, typically using cheap HDDs or some [more exotic](https://aws.amazon.com/storagegateway/vtl/) storage types internally. While NFS can sometimes work even faster than HDD if it is located in the same data center, object storage in the public cloud usually has latencies of 50-100ms. They are typically highly distributed and replicated for better availability.
 
-### Non-Volatile Memory
+由于 SDD/HDD 明显比 RAM 慢，因此在此级别或以下的所有内容通常称为外部存储器。
 
-While the data cells in CPU caches and the RAM only gently store just a few electrons (that periodically leak and need to be periodically refreshed), the data cells in *non-volatile memory* types store hundreds of them. This lets the data persist for prolonged periods of time without power but comes at the cost of performance and durability — because when you have more electrons, you also have more opportunities for them to collide with silicon atoms.
-
-<!-- error correction -->
-
-There are many ways to store data in a persistent way, but these are the main ones from a programmer's perspective:
-
-- **Solid state drives.** These have relatively low latency on the order of 0.1ms ($10^5$ ns), but they also have a high cost, amplified by the fact that they have limited lifespans as each cell can only be written to a limited number of times. This is what mobile devices and most laptops use because they are compact and have no moving parts.
-- **Hard disk drives** are unusual because they are actually [rotating physical disks](https://www.youtube.com/watch?v=3owqvmMf6No&feature=emb_title) with a read/write head attached to them. To read a memory location, you need to wait until the disk rotates to the right position and then very precisely move the head to it. This results in some very weird access patterns where reading one byte randomly may take the same time as reading the next 1MB of data — which is usually on the order of milliseconds. Since this is the only part of a computer, except for the cooling system, that has mechanically moving parts, hard disks break quite often (with the average lifespan of ~3 years for a data center HDD).
-- **Network-attached storage**, which is the practice of using other networked devices to store data on them. There are two distinctive types. The first one is the Network File System (NFS), which is a protocol for mounting the file system of another computer over the network. The other is API-based distributed storage systems, most famously [Amazon S3](https://aws.amazon.com/s3/), that are backed by a fleet of storage-optimized machines of a public cloud, typically using cheap HDDs or some [more exotic](https://aws.amazon.com/storagegateway/vtl/) storage types internally. While NFS can sometimes work even faster than HDD if it is located in the same data center, object storage in the public cloud usually has latencies of 50-100ms. They are typically highly distributed and replicated for better availability.
-
-Since SDD/HDD are noticeably slower than RAM, everything on or below this level is usually called *external memory*.
-
-Unlike the CPU caches, external memory can be explicitly controlled. This is useful in many cases, but most programmers just want to abstract away from it and use it as an extension of the main memory, and operating systems have the capability to do so by the means of [virtual memory](../virtual).
+与 CPU 缓存不同，外部存储器可以显式控制。这在许多情况下都很有用，但大多数程序员只想从中抽象出来，并将其用作主内存的扩展，而操作系统可以通过虚拟内存来做到这一点。
